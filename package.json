@@ -1,0 +1,40 @@
+{
+  "name": "logiq-v2",
+  "main": "expo-router/entry",
+  "version": "2.0.0",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~54.0.0",
+    "expo-router": "~5.0.0",
+    "react": "19.0.0",
+    "react-native": "0.81.0",
+    "react-native-safe-area-context": "5.1.0",
+    "react-native-screens": "5.0.0",
+    "expo-linking": "~8.0.0",
+    "expo-constants": "~18.0.0",
+    "expo-status-bar": "~3.0.0",
+    "@react-native-community/slider": "4.5.5",
+    "openai": "^4.0.0",
+    "i18next": "23.11.5",
+    "react-i18next": "14.1.2",
+    "expo-localization": "~17.0.0",
+    "expo-font": "~14.0.1",
+    "@expo/vector-icons": "~15.0.3",
+    "react-native-reanimated": "~4.0.0",
+    "react-native-gesture-handler": "~3.0.0",
+    "react-native-svg": "16.0.0",
+    "@react-native-async-storage/async-storage": "2.1.0",
+    "expo-build-properties": "~1.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@types/react": "~19.0.0",
+    "typescript": "^5.3.3"
+  },
+  "private": true
+}

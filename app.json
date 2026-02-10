@@ -1,0 +1,39 @@
+{
+    "expo": {
+        "name": "LogiQ V2",
+        "slug": "logiq",
+        "owner": "mrdeath2",
+        "version": "2.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/images/icon.png",
+        "scheme": "logiq",
+        "userInterfaceStyle": "automatic",
+        "newArchEnabled": true,
+        "android": {
+            "package": "com.logiq.app.pro",
+            "versionCode": 91,
+            "enable16KBPages": true
+        },
+        "plugins": [
+            "expo-router",
+            [
+                "expo-build-properties",
+                {
+                    "android": {
+                        "enable16KBPages": true,
+                        "packagingOptions": {
+                            "jniLibs": {
+                                "useLegacyPackaging": false
+                            }
+                        }
+                    }
+                }
+            ]
+        ],
+        "extra": {
+            "eas": {
+                "projectId": "37df912e-e6c7-476d-9263-83143ac48e5f"
+            }
+        }
+    }
+}
