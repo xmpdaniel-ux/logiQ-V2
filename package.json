@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "expo": "~54.0.0",
-    "expo-router": "~5.0.0",
+    "expo-router": "~3.5.23",
     "react": "19.0.0",
     "react-native": "0.81.0",
     "react-native-safe-area-context": "5.1.0",
-    "react-native-screens": "5.0.0",
+    "react-native-screens": "~3.31.1",
     "expo-linking": "~8.0.0",
     "expo-constants": "~18.0.0",
     "expo-status-bar": "~3.0.0",
