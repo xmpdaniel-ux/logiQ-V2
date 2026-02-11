@@ -8,7 +8,7 @@
         "icon": "./assets/images/icon.png",
         "scheme": "logiq",
         "userInterfaceStyle": "automatic",
-        "newArchEnabled": true,
+        "newArchEnabled": false,
         "android": {
             "package": "com.logiq.app.pro",
             "versionCode": 91,
