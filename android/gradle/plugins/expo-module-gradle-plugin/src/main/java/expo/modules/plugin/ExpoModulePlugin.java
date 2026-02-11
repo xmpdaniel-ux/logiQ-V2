@@ -9,11 +9,11 @@ public class ExpoModulePlugin implements Plugin<Project> {
         // Register the 'expoModule' extension to satisfy the DSL
         project.getExtensions().create("expoModule", ExpoModuleExtension.class);
     }
-}
 
-class ExpoModuleExtension {
-    public void canBePublished(boolean value) {
-        // No-op
+    public static class ExpoModuleExtension {
+        public void canBePublished(boolean value) {
+            // No-op
+        }
     }
 }
 
