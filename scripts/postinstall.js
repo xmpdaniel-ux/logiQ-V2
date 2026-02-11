@@ -49,25 +49,52 @@ console.log('[postinstall] Successfully patched ExpoModulesCorePlugin.gradle (co
 // --- Fix 2: Ensure hermesc is executable (Linux only, for EAS) ---
 const platform = require('os').platform();
 if (platform === 'linux') {
-  const hermesPath = path.join(
-    __dirname,
-    '..',
-    'node_modules',
-    'react-native',
-    'sdks',
-    'hermesc',
-    'linux64-bin',
-    'hermesc'
-  );
+  console.log('[postinstall] Running on Linux. Attempting to fix hermesc permissions.');
+
+  let hermesPath;
+  try {
+    // Robustly find react-native package root
+    const rnPath = path.dirname(require.resolve('react-native/package.json'));
+    hermesPath = path.join(rnPath, 'sdks', 'hermesc', 'linux64-bin', 'hermesc');
+    console.log('[postinstall] Resolved react-native path:', rnPath);
+    console.log('[postinstall] Target hermesc path:', hermesPath);
+  } catch (error) {
+    console.error('[postinstall] Failed to resolve react-native path:', error);
+    // Fallback to relative path if resolution fails
+    hermesPath = path.join(__dirname, '..', 'node_modules', 'react-native', 'sdks', 'hermesc', 'linux64-bin', 'hermesc');
+    console.log('[postinstall] Falling back to relative path:', hermesPath);
+  }
 
   if (fs.existsSync(hermesPath)) {
     try {
+      // Log current stats
+      const stats = fs.statSync(hermesPath);
+      console.log('[postinstall] Current hermesc permissions:', (stats.mode & 0o777).toString(8));
+
+      // Force executable permissions
       fs.chmodSync(hermesPath, '755');
+
+      // Verify change
+      const newStats = fs.statSync(hermesPath);
+      console.log('[postinstall] New hermesc permissions:', (newStats.mode & 0o777).toString(8));
       console.log('[postinstall] Successfully set permissions for hermesc.');
     } catch (error) {
       console.error('[postinstall] Failed to set permissions for hermesc:', error);
     }
   } else {
-    console.log('[postinstall] hermesc not found at expected path (skipping chmod):', hermesPath);
+    console.error('[postinstall] CRITICAL: hermesc binary NOT FOUND at:', hermesPath);
+    // Debug: List contents of sdks directory if possible
+    try {
+      const sdksDir = path.dirname(path.dirname(hermesPath));
+      if (fs.existsSync(sdksDir)) {
+        console.log(`[postinstall] Contents of ${sdksDir}:`, fs.readdirSync(sdksDir));
+        const linuxBin = path.join(sdksDir, 'hermesc', 'linux64-bin');
+        if (fs.existsSync(linuxBin)) {
+          console.log(`[postinstall] Contents of ${linuxBin}:`, fs.readdirSync(linuxBin));
+        }
+      }
+    } catch (e) {
+      console.error('[postinstall] Error listing directories:', e);
+    }
   }
 }
