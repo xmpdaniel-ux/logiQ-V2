@@ -1,0 +1,12 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
+gradlePlugin {
+    plugins {
+        expoModulePlugin {
+            id = 'expo-module-gradle-plugin'
+            implementationClass = 'expo.modules.plugin.ExpoModulePlugin'
+        }
+    }
+}
