@@ -11,19 +11,37 @@ public class ExpoModulePlugin implements Plugin<Project> {
         project.getExtensions().create("expoModule", ExpoModuleExtension.class);
 
         // Inject default Android configuration to satisfy compileSdkVersion requirement
-        project.afterEvaluate(p -> {
-            if (p.getExtensions().findByName("android") != null) {
-                LibraryExtension android = (LibraryExtension) p.getExtensions().getByName("android");
-                if (android.getCompileSdkVersion() == null) {
-                    System.out.println("Injecting compileSdkVersion 34 into " + p.getName());
-                    android.compileSdkVersion(34);
-                    android.defaultConfig(config -> {
-                        config.minSdkVersion(23);
-                        config.targetSdkVersion(34);
-                    });
+        // We try to configure it immediately if available, or wait for it to be added
+        configureAndroidExtension(project);
+    }
+
+    private void configureAndroidExtension(Project project) {
+        // Try to find the android extension
+        Object androidExtension = project.getExtensions().findByName("android");
+        if (androidExtension != null && androidExtension instanceof LibraryExtension) {
+            applyConfiguration((LibraryExtension) androidExtension, project);
+        } else {
+            // If not found yet, wait for afterEvaluate
+            project.afterEvaluate(p -> {
+                Object ext = p.getExtensions().findByName("android");
+                if (ext != null && ext instanceof LibraryExtension) {
+                    applyConfiguration((LibraryExtension) ext, p);
                 }
-            }
-        });
+            });
+        }
+    }
+
+    private void applyConfiguration(LibraryExtension android, Project project) {
+        if (android.getCompileSdkVersion() == null) {
+            System.out.println("Shim: Injecting compileSdkVersion 34 into " + project.getName());
+            android.compileSdkVersion(34);
+            android.defaultConfig(config -> {
+                config.minSdkVersion(23);
+                config.targetSdkVersion(34);
+            });
+        } else {
+            System.out.println("Shim: " + project.getName() + " already has compileSdkVersion: " + android.getCompileSdkVersion());
+        }
     }
 
     public static class ExpoModuleExtension {
