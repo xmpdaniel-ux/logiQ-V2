@@ -98,3 +98,39 @@ if (platform === 'linux') {
     }
   }
 }
+
+// --- Fix 3: Patch PermissionsService.kt (Kotlin null-safety error) ---
+const permissionsServicePath = path.join(
+  __dirname,
+  '..',
+  'node_modules',
+  'expo-modules-core',
+  'android',
+  'src',
+  'main',
+  'java',
+  'expo',
+  'modules',
+  'adapters',
+  'react',
+  'permissions',
+  'PermissionsService.kt'
+);
+
+if (fs.existsSync(permissionsServicePath)) {
+  let ktContent = fs.readFileSync(permissionsServicePath, 'utf8');
+  const ktOriginal = 'return requestedPermissions.contains(permission)';
+  const ktPatched = 'return requestedPermissions?.contains(permission) == true';
+
+  if (ktContent.includes(ktOriginal)) {
+    ktContent = ktContent.replace(ktOriginal, ktPatched);
+    fs.writeFileSync(permissionsServicePath, ktContent, 'utf8');
+    console.log('[postinstall] Successfully patched PermissionsService.kt (null-safety fix).');
+  } else if (ktContent.includes(ktPatched)) {
+    console.log('[postinstall] PermissionsService.kt already patched.');
+  } else {
+    console.log('[postinstall] WARNING: Could not find target code in PermissionsService.kt to patch.');
+  }
+} else {
+  console.log('[postinstall] PermissionsService.kt not found at:', permissionsServicePath);
+}
