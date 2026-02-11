@@ -2,7 +2,7 @@
     "build": {
         "production": {
             "android": {
-                "image": "ubuntu-24.04-jdk-17-ndk-r27b",
+                "image": "ubuntu-22.04-jdk-17-ndk-r27b",
                 "buildType": "app-bundle",
                 "ndk": "27.0.12077973",
                 "gradleCommand": ":app:bundleRelease"
