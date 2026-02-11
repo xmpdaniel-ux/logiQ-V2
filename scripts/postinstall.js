@@ -1,6 +1,6 @@
 /**
  * postinstall.js
- * Patches expo-modules-core, fixes Hermes permissions, and resolves Kotlin errors.
+ * Patches expo-modules-core, fixes Hermes permissions, resolves Kotlin errors, and fixes dependency scope.
  * This runs automatically after `npm install` on EAS Cloud.
  */
 const fs = require('fs');
@@ -108,4 +108,35 @@ if (fs.existsSync(permissionsServicePath)) {
   }
 } else {
   console.log('[postinstall] PermissionsService.kt not found at:', permissionsServicePath);
+}
+
+// --- Fix 4: Patch autolinking_implementation.gradle (Fix 'cannot find symbol' in :expo) ---
+const autolinkingImplPath = path.join(
+  __dirname,
+  '..',
+  'node_modules',
+  'expo-modules-autolinking',
+  'scripts',
+  'android',
+  'autolinking_implementation.gradle'
+);
+
+if (fs.existsSync(autolinkingImplPath)) {
+  let alContent = fs.readFileSync(autolinkingImplPath, 'utf8');
+  // Replace "handler.add('api', dependency)" with "handler.add('implementation', dependency)"
+  // We do this for both occurrences (lines ~301 and ~303)
+  const alOriginal = /handler\.add\('api',/g;
+  const alPatched = "handler.add('implementation',";
+
+  if (alContent.match(alOriginal)) {
+    alContent = alContent.replace(alOriginal, alPatched);
+    fs.writeFileSync(autolinkingImplPath, alContent, 'utf8');
+    console.log('[postinstall] Successfully patched autolinking_implementation.gradle (switched api -> implementation).');
+  } else if (alContent.includes("handler.add('implementation',")) {
+    console.log('[postinstall] autolinking_implementation.gradle already patched.');
+  } else {
+    console.log('[postinstall] WARNING: Could not find "handler.add(\'api\'," in autolinking_implementation.gradle.');
+  }
+} else {
+  console.log('[postinstall] autolinking_implementation.gradle not found at:', autolinkingImplPath);
 }
