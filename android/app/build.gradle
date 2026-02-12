@@ -114,11 +114,11 @@ android {
         applicationId 'com.logiq.app.pro'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 93
+        versionCode 94
         versionName "2.0.0"
         externalNativeBuild {
             cmake {
-                arguments "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384"
+                arguments "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384", "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-z,max-page-size=16384"
             }
         }
     }
@@ -146,7 +146,17 @@ android {
     }
     packagingOptions {
         jniLibs {
-            useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
+            useLegacyPackaging = false
+        }
+    }
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+    bundle {
+        jniLibs {
+            useLegacyPackaging = false
         }
     }
 }

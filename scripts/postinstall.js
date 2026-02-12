@@ -115,25 +115,16 @@ const reanimatedCMakePath = path.join(__dirname, '..', 'node_modules', 'react-na
 if (fs.existsSync(reanimatedCMakePath)) {
   let cmakeContent = fs.readFileSync(reanimatedCMakePath, 'utf8');
 
-  // Clean up any previous attempts that might have used CMAKE_CXX_FLAGS erroneously
-  if (cmakeContent.includes('string(APPEND CMAKE_CXX_FLAGS " -Wl,-z,max-page-size=16384")')) {
-    cmakeContent = cmakeContent.replace('string(APPEND CMAKE_CXX_FLAGS " -Wl,-z,max-page-size=16384")', '');
-  }
+  const patchFlag = 'add_link_options("-Wl,-z,max-page-size=16384")';
 
-  if (!cmakeContent.includes('CMAKE_SHARED_LINKER_FLAGS " -Wl,-z,max-page-size=16384"')) {
-    // Inject LEFT side of the error: Pass linker flags ONLY to the linker, not the compiler.
-    // This prevents "unused command line argument" error during compilation.
-    const patchFlag = 'string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,-z,max-page-size=16384")';
-
-    if (cmakeContent.includes('target_link_libraries(')) {
-      // More robust: insert before the first target_link_libraries call
-      cmakeContent = cmakeContent.replace('target_link_libraries(', patchFlag + '\ntarget_link_libraries(', 1);
-    } else if (cmakeContent.includes('string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")')) {
-      cmakeContent = cmakeContent.replace('string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")', 'string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")\n' + patchFlag);
+  if (!cmakeContent.includes('max-page-size=16384')) {
+    // Find the best place to inject (after project or cmake_minimum_required)
+    if (cmakeContent.includes('cmake_minimum_required')) {
+      cmakeContent = cmakeContent.replace(/cmake_minimum_required\(.*\)/, '$&\n' + patchFlag);
     } else {
-      cmakeContent += '\n' + patchFlag + '\n';
+      cmakeContent = patchFlag + '\n' + cmakeContent;
     }
     fs.writeFileSync(reanimatedCMakePath, cmakeContent, 'utf8');
-    console.log('[postinstall] Patched Reanimated CMakeLists.txt (16KB Alignment - Corrected)');
+    console.log('[postinstall] Patched Reanimated CMakeLists.txt (16KB Global Linker Flag)');
   }
 }
