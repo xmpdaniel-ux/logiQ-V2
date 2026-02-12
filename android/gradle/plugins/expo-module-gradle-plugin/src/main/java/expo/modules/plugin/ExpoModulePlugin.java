@@ -18,8 +18,9 @@ public class ExpoModulePlugin implements Plugin<Project> {
         if (!project.getName().equals("expo-modules-core")) {
             System.out.println("Shim: Adding expo-modules-core dependency to " + project.getName());
             project.getDependencies().add("implementation", project.getRootProject().findProject(":expo-modules-core"));
-             // Also add kotlin-stdlib explicitly to be safe, though kotlin-android usually handles it.
-             // But expo-modules-core should bring it transitively.
+            
+            // Also explicitly add kotlin-stdlib
+            project.getDependencies().add("implementation", "org.jetbrains.kotlin:kotlin-stdlib:1.9.23");
         }
 
         // 3. Inject configuration
