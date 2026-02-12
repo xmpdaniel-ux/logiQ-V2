@@ -125,7 +125,10 @@ if (fs.existsSync(reanimatedCMakePath)) {
     // This prevents "unused command line argument" error during compilation.
     const patchFlag = 'string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,-z,max-page-size=16384")';
 
-    if (cmakeContent.includes('string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")')) {
+    if (cmakeContent.includes('target_link_libraries(')) {
+      // More robust: insert before the first target_link_libraries call
+      cmakeContent = cmakeContent.replace('target_link_libraries(', patchFlag + '\ntarget_link_libraries(', 1);
+    } else if (cmakeContent.includes('string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")')) {
       cmakeContent = cmakeContent.replace('string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")', 'string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")\n' + patchFlag);
     } else {
       cmakeContent += '\n' + patchFlag + '\n';

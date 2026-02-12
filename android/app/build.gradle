@@ -114,11 +114,11 @@ android {
         applicationId 'com.logiq.app.pro'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 92
+        versionCode 93
         versionName "2.0.0"
         externalNativeBuild {
             cmake {
-                cppFlags "-Wl,-z,max-page-size=16384"
+                arguments "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384"
             }
         }
     }
