@@ -11,7 +11,7 @@
         "newArchEnabled": false,
         "android": {
             "package": "com.logiq.app.pro",
-            "versionCode": 91,
+            "versionCode": 92,
             "enable16KBPages": true
         },
         "plugins": [
