@@ -114,7 +114,7 @@ android {
         applicationId 'com.logiq.app.pro'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 94
+        versionCode 95
         versionName "2.0.0"
         externalNativeBuild {
             cmake {
@@ -144,17 +144,7 @@ android {
             crunchPngs (findProperty('android.enablePngCrunchInReleaseBuilds')?.toBoolean() ?: true)
         }
     }
-    packagingOptions {
-        jniLibs {
-            useLegacyPackaging = false
-        }
-    }
     packaging {
-        jniLibs {
-            useLegacyPackaging = false
-        }
-    }
-    bundle {
         jniLibs {
             useLegacyPackaging = false
         }
