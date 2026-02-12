@@ -33,14 +33,25 @@ public class ExpoModulePlugin implements Plugin<Project> {
     }
 
     private void applyAndroidConfig(Project project) {
-         LibraryExtension android = (LibraryExtension) project.getExtensions().findByName("android");
-         if (android != null && android.getCompileSdkVersion() == null) {
-             System.out.println("Shim: Injecting compileSdkVersion 34 into " + project.getName());
-             android.compileSdkVersion(34);
-             android.defaultConfig(config -> {
-                 config.minSdkVersion(23);
-                 config.targetSdkVersion(34);
-             });
+         try {
+             LibraryExtension android = (LibraryExtension) project.getExtensions().findByName("android");
+             if (android != null && android.getCompileSdkVersion() == null) {
+                 System.out.println("Shim: Injecting compileSdkVersion 34 into " + project.getName());
+                 android.compileSdkVersion(34);
+                 android.defaultConfig(config -> {
+                     config.minSdkVersion(23);
+                     config.targetSdkVersion(34);
+                 });
+             }
+         } catch (Exception e) {
+             System.out.println("Shim: Skipping SDK injection for " + project.getName() + " due to casting issue: " + e.getMessage());
          }
+    }
+
+    // This class satisfies the DSL requirements for "expoModule { ... }"
+    public static class ExpoModuleExtension {
+        public void canBePublished(boolean value) {}
+        public void name(String value) {}
+        public void version(String value) {}
     }
 }
