@@ -39,3 +39,24 @@ allprojects {
         maven { url 'https://www.jitpack.io' }
     }
 }
+
+// Global 16KB Alignment Injection (Owner of the Build Decision)
+subprojects {
+    afterEvaluate {
+        if (it.hasProperty('android')) {
+            it.android {
+                if (it.hasProperty('externalNativeBuild') && it.externalNativeBuild.hasProperty('cmake')) {
+                    it.externalNativeBuild.cmake {
+                        // This forces the flag into Reanimated and other CMake-based modules
+                        arguments "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384", 
+                                  "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-z,max-page-size=16384"
+                    }
+                }
+                // Also force uncompressed native libs globally
+                if (it.hasProperty('packaging')) {
+                    it.packaging.jniLibs.useLegacyPackaging = false
+                }
+            }
+        }
+    }
+}

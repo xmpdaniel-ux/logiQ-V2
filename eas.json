@@ -8,8 +8,6 @@
             },
             "env": {
                 "NODE_VERSION": "20.18.0",
-                "ANDROID_BUNDLE_ENABLE_UNCOMPRESSED_NATIVE_LIBS": "true",
-                "GRADLE_OPTS": "-Dandroid.bundle.enableUncompressedNativeLibs=true -Dorg.gradle.jvmargs=-Xmx4g",
                 "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
             }
         }
