@@ -82,24 +82,16 @@ if (fs.existsSync(workletDecoratorPath)) {
   }
 
   // 2. Replace VLA with std::vector
-  // Match the block containing the VLA definition and usage
   const vlaMarker = 'jsi::Value args[argsSize]; // NOLINT(runtime/arrays)';
   if (cppContent.includes(vlaMarker)) {
-    // We do a somewhat safer replace using the specific VLA line and surrounding context if possible, 
-    // but simple replacement of the marker + modifying the call might be easier if we can match enough context.
-    // Let's replace the array decl and the call.
-
     cppContent = cppContent.replace(
       'jsi::Value args[argsSize]; // NOLINT(runtime/arrays)',
       'std::vector<jsi::Value> args(argsSize); // VLA patched to vector'
     );
 
-    // Replace the call site to use args.data()
-    // Original: .call(rt, args, argsSize);
-    // Patched: .call(rt, args.data(), argsSize);
-    // Caution: simple replace might match other calls, but this file is specific.
+    // Replace the call site to use args.data() with explicit cast to avoid ambiguity
     if (cppContent.includes('.call(rt, args, argsSize);')) {
-      cppContent = cppContent.replace('.call(rt, args, argsSize);', '.call(rt, args.data(), argsSize);');
+      cppContent = cppContent.replace('.call(rt, args, argsSize);', '.call(rt, (const jsi::Value*)args.data(), argsSize);');
     }
 
     fs.writeFileSync(workletDecoratorPath, cppContent, 'utf8');
