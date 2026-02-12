@@ -8,25 +8,28 @@ public class ExpoModulePlugin implements Plugin<Project> {
     public void apply(Project project) {
         project.getExtensions().create("expoModule", ExpoModuleExtension.class);
 
-        // Ensure Kotlin is applied because Expo modules are Kotlin-based
-        // Most modules rely on expo-module-gradle-plugin to apply kotlin-android
+        // 1. Ensure Kotlin is applied
         if (!project.getPlugins().hasPlugin("org.jetbrains.kotlin.android")) {
             System.out.println("Shim: Applying kotlin-android to " + project.getName());
             project.getPluginManager().apply("org.jetbrains.kotlin.android");
         }
 
-        // Inject default Android configuration to satisfy compileSdkVersion requirement
-        // We try to configure it immediately if available, or wait for it to be added
+        // 2. Add expo-modules-core dependency (CRITICAL for Module, ModuleDefinition symbols)
+        if (!project.getName().equals("expo-modules-core")) {
+            System.out.println("Shim: Adding expo-modules-core dependency to " + project.getName());
+            project.getDependencies().add("implementation", project.getRootProject().findProject(":expo-modules-core"));
+             // Also add kotlin-stdlib explicitly to be safe, though kotlin-android usually handles it.
+             // But expo-modules-core should bring it transitively.
+        }
+
+        // 3. Inject configuration
         configureAndroidExtension(project);
     }
 
     private void configureAndroidExtension(Project project) {
-        // Attempt immediate configuration
         if (project.getExtensions().findByName("android") != null) {
             applyAndroidConfig(project);
         }
-
-        // Also register a listener in case the android plugin is applied later
         project.getPlugins().withId("com.android.library", plugin -> {
              applyAndroidConfig(project);
         });
@@ -48,7 +51,6 @@ public class ExpoModulePlugin implements Plugin<Project> {
          }
     }
 
-    // This class satisfies the DSL requirements for "expoModule { ... }"
     public static class ExpoModuleExtension {
         public void canBePublished(boolean value) {}
         public void name(String value) {}
