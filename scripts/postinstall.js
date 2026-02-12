@@ -116,15 +116,21 @@ if (fs.existsSync(reanimatedCMakePath)) {
   let cmakeContent = fs.readFileSync(reanimatedCMakePath, 'utf8');
 
   const patchFlag = 'add_link_options("-Wl,-z,max-page-size=16384")';
+  const oldPatch = 'string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,-z,max-page-size=16384")';
 
-  if (!cmakeContent.includes('max-page-size=16384')) {
-    // Find the best place to inject (after project or cmake_minimum_required)
+  // Always remove the weak/old patch if it exists
+  if (cmakeContent.includes(oldPatch)) {
+    cmakeContent = cmakeContent.replace(oldPatch, '');
+  }
+
+  // Inject the strong patch if not present
+  if (!cmakeContent.includes('add_link_options("-Wl,-z,max-page-size=16384")')) {
     if (cmakeContent.includes('cmake_minimum_required')) {
       cmakeContent = cmakeContent.replace(/cmake_minimum_required\(.*\)/, '$&\n' + patchFlag);
     } else {
       cmakeContent = patchFlag + '\n' + cmakeContent;
     }
     fs.writeFileSync(reanimatedCMakePath, cmakeContent, 'utf8');
-    console.log('[postinstall] Patched Reanimated CMakeLists.txt (16KB Global Linker Flag)');
+    console.log('[postinstall] Force-Patched Reanimated CMakeLists.txt (16KB Global Linker Flag)');
   }
 }
