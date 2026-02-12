@@ -114,17 +114,23 @@ if (fs.existsSync(nativeReanimatedModulePath)) {
 const reanimatedCMakePath = path.join(__dirname, '..', 'node_modules', 'react-native-reanimated', 'android', 'CMakeLists.txt');
 if (fs.existsSync(reanimatedCMakePath)) {
   let cmakeContent = fs.readFileSync(reanimatedCMakePath, 'utf8');
-  if (!cmakeContent.includes('max-page-size=16384')) {
-    // Inject the linker flag into CMAKE_CXX_FLAGS
-    const patchFlag = 'string(APPEND CMAKE_CXX_FLAGS " -Wl,-z,max-page-size=16384")';
-    // Attempt to insert after NDEBUG definition to ensure it's picked up
+
+  // Clean up any previous attempts that might have used CMAKE_CXX_FLAGS erroneously
+  if (cmakeContent.includes('string(APPEND CMAKE_CXX_FLAGS " -Wl,-z,max-page-size=16384")')) {
+    cmakeContent = cmakeContent.replace('string(APPEND CMAKE_CXX_FLAGS " -Wl,-z,max-page-size=16384")', '');
+  }
+
+  if (!cmakeContent.includes('CMAKE_SHARED_LINKER_FLAGS " -Wl,-z,max-page-size=16384"')) {
+    // Inject LEFT side of the error: Pass linker flags ONLY to the linker, not the compiler.
+    // This prevents "unused command line argument" error during compilation.
+    const patchFlag = 'string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,-z,max-page-size=16384")';
+
     if (cmakeContent.includes('string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")')) {
-      cmakeContent = cmakeContent.replace('string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")', 'string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")\n    ' + patchFlag);
+      cmakeContent = cmakeContent.replace('string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")', 'string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")\n' + patchFlag);
     } else {
-      // Fallback injection at end of file if pattern not found
       cmakeContent += '\n' + patchFlag + '\n';
     }
     fs.writeFileSync(reanimatedCMakePath, cmakeContent, 'utf8');
-    console.log('[postinstall] Patched Reanimated CMakeLists.txt (16KB Alignment)');
+    console.log('[postinstall] Patched Reanimated CMakeLists.txt (16KB Alignment - Corrected)');
   }
 }
