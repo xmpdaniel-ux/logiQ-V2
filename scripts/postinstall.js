@@ -98,3 +98,15 @@ if (fs.existsSync(workletDecoratorPath)) {
     console.log('[postinstall] Patched WorkletRuntimeDecorator.cpp');
   }
 }
+
+// --- Fix 7: Patch NativeReanimatedModule.cpp (Implicit capture of 'this') ---
+const nativeReanimatedModulePath = path.join(__dirname, '..', 'node_modules', 'react-native-reanimated', 'Common', 'cpp', 'NativeModules', 'NativeReanimatedModule.cpp');
+if (fs.existsSync(nativeReanimatedModulePath)) {
+  let content = fs.readFileSync(nativeReanimatedModulePath, 'utf8');
+  if (!content.includes('pragma clang diagnostic ignored "-Wdeprecated-this-capture"')) {
+    // We only add -Wdeprecated-this-capture. Do NOT add -Werror ignore as it fails on NDK 27.
+    content = content.replace('#include "NativeReanimatedModule.h"', '#include "NativeReanimatedModule.h"\n\n#pragma clang diagnostic push\n#pragma clang diagnostic ignored "-Wdeprecated-this-capture"');
+    fs.writeFileSync(nativeReanimatedModulePath, content, 'utf8');
+    console.log('[postinstall] Patched NativeReanimatedModule.cpp (Supressed warnings)');
+  }
+}
