@@ -104,9 +104,27 @@ const nativeReanimatedModulePath = path.join(__dirname, '..', 'node_modules', 'r
 if (fs.existsSync(nativeReanimatedModulePath)) {
   let content = fs.readFileSync(nativeReanimatedModulePath, 'utf8');
   if (!content.includes('pragma clang diagnostic ignored "-Wdeprecated-this-capture"')) {
-    // We only add -Wdeprecated-this-capture. Do NOT add -Werror ignore as it fails on NDK 27.
     content = content.replace('#include "NativeReanimatedModule.h"', '#include "NativeReanimatedModule.h"\n\n#pragma clang diagnostic push\n#pragma clang diagnostic ignored "-Wdeprecated-this-capture"');
     fs.writeFileSync(nativeReanimatedModulePath, content, 'utf8');
     console.log('[postinstall] Patched NativeReanimatedModule.cpp (Supressed warnings)');
+  }
+}
+
+// --- Fix 8: Patch Reanimated CMakeLists.txt (16KB Page Alignment) ---
+const reanimatedCMakePath = path.join(__dirname, '..', 'node_modules', 'react-native-reanimated', 'android', 'CMakeLists.txt');
+if (fs.existsSync(reanimatedCMakePath)) {
+  let cmakeContent = fs.readFileSync(reanimatedCMakePath, 'utf8');
+  if (!cmakeContent.includes('max-page-size=16384')) {
+    // Inject the linker flag into CMAKE_CXX_FLAGS
+    const patchFlag = 'string(APPEND CMAKE_CXX_FLAGS " -Wl,-z,max-page-size=16384")';
+    // Attempt to insert after NDEBUG definition to ensure it's picked up
+    if (cmakeContent.includes('string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")')) {
+      cmakeContent = cmakeContent.replace('string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")', 'string(APPEND CMAKE_CXX_FLAGS " -DNDEBUG")\n    ' + patchFlag);
+    } else {
+      // Fallback injection at end of file if pattern not found
+      cmakeContent += '\n' + patchFlag + '\n';
+    }
+    fs.writeFileSync(reanimatedCMakePath, cmakeContent, 'utf8');
+    console.log('[postinstall] Patched Reanimated CMakeLists.txt (16KB Alignment)');
   }
 }
