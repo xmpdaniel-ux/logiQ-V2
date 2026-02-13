@@ -4,11 +4,12 @@
             "android": {
                 "image": "ubuntu-24.04-jdk-17-ndk-r27b",
                 "buildType": "app-bundle",
-                "ndk": "27.0.12077973"
+                "ndk": "28.0.12433566"
             },
             "env": {
                 "NODE_VERSION": "20.18.0",
-                "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+                "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+                "EXPO_NO_TELEMETRY": "1"
             }
         }
     },
