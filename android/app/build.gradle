@@ -114,7 +114,7 @@ android {
         applicationId 'com.logiq.app.pro'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 99
+        versionCode 100
         versionName "2.0.0"
         externalNativeBuild {
             cmake {

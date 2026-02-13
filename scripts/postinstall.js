@@ -110,27 +110,66 @@ if (fs.existsSync(nativeReanimatedModulePath)) {
   }
 }
 
-// --- Fix 8: Patch Reanimated CMakeLists.txt (16KB Page Alignment) ---
-const reanimatedCMakePath = path.join(__dirname, '..', 'node_modules', 'react-native-reanimated', 'android', 'CMakeLists.txt');
-if (fs.existsSync(reanimatedCMakePath)) {
-  let cmakeContent = fs.readFileSync(reanimatedCMakePath, 'utf8');
+// --- Fix 8: Operation Scorched Earth - Recursive 16KB Patching ---
+const modulesToPatch = [
+  'react-native-reanimated',
+  'expo-modules-core',
+  'react-native-screens',
+  'react-native-gesture-handler',
+  'react-native-svg',
+  'react-native-safe-area-context',
+  'react-native-video', // If present
+  'react-native-image-picker' // If present
+];
 
-  const patchFlag = 'add_link_options("-Wl,-z,max-page-size=16384")';
-  const oldPatch = 'string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,-z,max-page-size=16384")';
-
-  // Always remove the weak/old patch if it exists
-  if (cmakeContent.includes(oldPatch)) {
-    cmakeContent = cmakeContent.replace(oldPatch, '');
-  }
-
-  // Inject the strong patch if not present
-  if (!cmakeContent.includes('add_link_options("-Wl,-z,max-page-size=16384")')) {
-    if (cmakeContent.includes('cmake_minimum_required')) {
-      cmakeContent = cmakeContent.replace(/cmake_minimum_required\(.*\)/, '$&\n' + patchFlag);
-    } else {
-      cmakeContent = patchFlag + '\n' + cmakeContent;
+function findFiles(dir, filename, fileList = []) {
+  if (!fs.existsSync(dir)) return fileList;
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+    if (stat.isDirectory()) {
+      if (file !== 'node_modules' && file !== '.git') {
+        findFiles(filePath, filename, fileList);
+      }
+    } else if (file === filename) {
+      fileList.push(filePath);
     }
-    fs.writeFileSync(reanimatedCMakePath, cmakeContent, 'utf8');
-    console.log('[postinstall] Force-Patched Reanimated CMakeLists.txt (16KB Global Linker Flag)');
   }
+  return fileList;
 }
+
+const patchFlag = 'add_link_options("-Wl,-z,max-page-size=16384")';
+const oldPatch = 'string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,-z,max-page-size=16384")';
+
+modulesToPatch.forEach(moduleName => {
+  const modulePath = path.join(__dirname, '..', 'node_modules', moduleName);
+  if (fs.existsSync(modulePath)) {
+    const cmakeFiles = findFiles(modulePath, 'CMakeLists.txt');
+    cmakeFiles.forEach(cmakePath => {
+      let content = fs.readFileSync(cmakePath, 'utf8');
+      let patched = false;
+
+      // Clean old patch
+      if (content.includes(oldPatch)) {
+        content = content.replace(oldPatch, '');
+        patched = true;
+      }
+
+      // Inject new patch
+      if (!content.includes('max-page-size=16384')) {
+        if (content.includes('cmake_minimum_required')) {
+          content = content.replace(/cmake_minimum_required\(.*\)/, '$&\n' + patchFlag);
+        } else {
+          content = patchFlag + '\n' + content;
+        }
+        patched = true;
+      }
+
+      if (patched) {
+        fs.writeFileSync(cmakePath, content, 'utf8');
+        console.log(`[postinstall] Patched 16KB Flag in: ${path.relative(path.join(__dirname, '..'), cmakePath)}`);
+      }
+    });
+  }
+});
