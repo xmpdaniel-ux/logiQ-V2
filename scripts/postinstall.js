@@ -173,3 +173,51 @@ modulesToPatch.forEach(moduleName => {
     });
   }
 });
+
+// --- Fix 9: Scorched Earth - Repair @expo/cli Internal Resolution ---
+const expoCliPath = path.join(__dirname, '..', 'node_modules', '@expo', 'cli', 'build');
+if (fs.existsSync(expoCliPath)) {
+  const jsFiles = findFiles(expoCliPath, '.js'); // Need a variation of findFiles or update yours
+  // Actually, I'll update findFiles to support extension matching or just use it.
+  
+  // Updated findFiles-like loop for .js files
+  const patchInternalImports = (dir) => {
+    const files = fs.readdirSync(dir);
+    for (const file of files) {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+      if (stat.isDirectory()) {
+         patchInternalImports(filePath);
+      } else if (file.endsWith('.js')) {
+        let content = fs.readFileSync(filePath, 'utf8');
+        let altered = false;
+        
+        // Matches require("./something") or require("../something") without extension
+        // This is a surgical regex to add .js to internal relative requires
+        const requireRegex = /require\(\s*['"](\.\.?\/[^'"]+)(?<!\.js|[.\/])['"]\s*\)/g;
+        if (requireRegex.test(content)) {
+          content = content.replace(requireRegex, (match, p1) => {
+             // Verify if it's a file, not a directory
+             const targetPath = path.join(path.dirname(filePath), p1 + '.js');
+             if (fs.existsSync(targetPath)) {
+               altered = true;
+               return `require("${p1}.js")`;
+             }
+             return match;
+          });
+        }
+        
+        if (altered) {
+          fs.writeFileSync(filePath, content, 'utf8');
+        }
+      }
+    }
+  };
+  
+  try {
+    patchInternalImports(expoCliPath);
+    console.log('[postinstall] Applied scorched earth repair to @expo/cli imports');
+  } catch (e) {
+    console.error('[postinstall] Failed to apply scorched earth repair:', e.message);
+  }
+}
