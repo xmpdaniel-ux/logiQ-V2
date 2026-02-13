@@ -18,12 +18,17 @@ import typeof TextInlineImageNativeComponent from './TextInlineImageNativeCompon
 import * as React from 'react';
 
 type ImageComponentStaticsIOS = $ReadOnly<{
-  getSize: (
+  getSize(uri: string): Promise<{width: number, height: number}>,
+  getSize(
     uri: string,
     success: (width: number, height: number) => void,
     failure?: (error: mixed) => void,
-  ) => void,
+  ): void,
 
+  getSizeWithHeaders(
+    uri: string,
+    headers: {[string]: string, ...},
+  ): Promise<{width: number, height: number}>,
   getSizeWithHeaders(
     uri: string,
     headers: {[string]: string, ...},
@@ -51,18 +56,20 @@ type ImageComponentStaticsAndroid = $ReadOnly<{
   abortPrefetch(requestId: number): void,
 }>;
 
-export type AbstractImageAndroid = React.AbstractComponent<
-  ImagePropsType,
-  | React.ElementRef<TextInlineImageNativeComponent>
-  | React.ElementRef<ImageViewNativeComponent>,
->;
+export type AbstractImageAndroid = component(
+  ref: React.RefSetter<
+    | React.ElementRef<TextInlineImageNativeComponent>
+    | React.ElementRef<ImageViewNativeComponent>,
+  >,
+  ...props: ImagePropsType
+);
 
 export type ImageAndroid = AbstractImageAndroid & ImageComponentStaticsAndroid;
 
-export type AbstractImageIOS = React.AbstractComponent<
-  ImagePropsType,
-  React.ElementRef<ImageViewNativeComponent>,
->;
+export type AbstractImageIOS = component(
+  ref: React.RefSetter<React.ElementRef<ImageViewNativeComponent>>,
+  ...props: ImagePropsType
+);
 
 export type ImageIOS = AbstractImageIOS & ImageComponentStaticsIOS;
 
