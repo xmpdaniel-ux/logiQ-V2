@@ -11,8 +11,7 @@
     "newArchEnabled": false,
     "android": {
       "package": "com.logiq.app.pro",
-      "versionCode": 101,
-      "enable16KBPages": true
+      "versionCode": 101
     },
     "plugins": [
       "expo-router",

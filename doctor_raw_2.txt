@@ -1,0 +1,39 @@
+Running 17 checks on your project...
+13/17 checks passed. 4 checks failed. Possible issues detected:
+Use the --verbose flag to see more details about passed checks.
+
+✖ Check for common project setup issues
+The .expo directory is not ignored by Git. It contains machine-specific device history and development server settings and should not be committed.
+Advice:
+Add ".expo/" to your .gitignore to avoid committing local Expo state.
+
+✖ Check dependencies for packages that should not be installed directly
+The package "@expo/prebuild-config" should not be installed directly in your project. It is a dependency of other Expo packages, which will install it automatically as needed.
+The package "@expo/config-plugins" should not be installed directly in your project. You should instead use "expo/config-plugins" which is a sub-export of the expo package.
+If you installed "@expo/config-plugins" to fulfill a peer dependency for a config plugin, the plugin's maintainer should switch to the "expo/config-plugins" import, and you can ignore this warning.
+The package "@expo/metro-config" should not be installed directly in your project. You should instead use "expo/metro-config" which is a sub-export of the expo package.
+Advice:
+Remove these packages from your package.json.
+
+✖ Check that native modules use compatible support package versions for installed Expo SDK
+Expected package @expo/config-plugins@~10.1.1
+Found invalid:
+  @expo/config-plugins@9.0.17
+  @expo/config-plugins@9.0.17
+  (for more info, run: npm why @expo/config-plugins)
+Expected package @expo/prebuild-config@~9.0.0
+Found invalid:
+  @expo/prebuild-config@8.2.0
+  (for more info, run: npm why @expo/prebuild-config)
+Expected package @expo/metro-config@~0.20.18
+Found invalid:
+  @expo/metro-config@0.19.12
+  (for more info, run: npm why @expo/metro-config)
+Advice:
+Upgrade dependencies that are using the invalid package versions.
+
+✖ Check for app config fields that may not be synced in a non-CNG project
+This project contains native project folders but also has native configuration properties in app.json, indicating it is configured to use Prebuild. When the android/ios folders are present, EAS Build will not sync the following properties: orientation, icon, scheme, userInterfaceStyle, android, plugins. 
+
+
+4 checks failed, indicating possible issues with the project.

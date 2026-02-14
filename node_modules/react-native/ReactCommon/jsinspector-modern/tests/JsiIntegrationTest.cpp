@@ -348,21 +348,6 @@ TYPED_TEST(JsiIntegrationPortableTest, ExceptionDuringAddBindingIsIgnored) {
   EXPECT_TRUE(this->eval("globalThis.foo === 42").getBool());
 }
 
-TYPED_TEST(JsiIntegrationPortableTest, FuseboxSetClientMetadata) {
-  this->connect();
-
-  this->expectMessageFromPage(JsonEq(R"({
-                                          "id": 1,
-                                          "result": {}
-                                        })"));
-
-  this->toPage_->sendMessage(R"({
-                                 "id": 1,
-                                 "method": "FuseboxClient.setClientMetadata",
-                                 "params": {}
-                               })");
-}
-
 TYPED_TEST(JsiIntegrationPortableTest, ReactNativeApplicationEnable) {
   this->connect();
 
@@ -373,7 +358,9 @@ TYPED_TEST(JsiIntegrationPortableTest, ReactNativeApplicationEnable) {
   this->expectMessageFromPage(JsonEq(R"({
                                           "method": "ReactNativeApplication.metadataUpdated",
                                           "params": {
-                                            "integrationName": "JsiIntegrationTest"
+                                            "integrationName": "JsiIntegrationTest",
+                                            "unstable_isProfilingBuild": false,
+                                            "unstable_networkInspectionEnabled": false
                                           }
                                         })"));
 
@@ -703,7 +690,7 @@ TYPED_TEST(JsiIntegrationHermesTest, ScriptParsedExactlyOnce) {
 
 TYPED_TEST(JsiIntegrationHermesTest, FunctionDescriptionIncludesName) {
   // See
-  // https://github.com/facebookexperimental/rn-chrome-devtools-frontend/blob/9a23d4c7c4c2d1a3d9e913af38d6965f474c4284/front_end/ui/legacy/components/object_ui/ObjectPropertiesSection.ts#L311-L391
+  // https://github.com/facebook/react-native-devtools-frontend/blob/9a23d4c7c4c2d1a3d9e913af38d6965f474c4284/front_end/ui/legacy/components/object_ui/ObjectPropertiesSection.ts#L311-L391
 
   this->connect();
 

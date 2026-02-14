@@ -18,15 +18,15 @@ import type {
 import type {DetailType, PerformanceMarkOptions} from './UserTiming';
 
 import {EventCounts} from './EventTiming';
-import MemoryInfo from './MemoryInfo';
 import {
   performanceEntryTypeToRaw,
   rawToPerformanceEntry,
-} from './RawPerformanceEntry';
+} from './internals/RawPerformanceEntry';
+import {warnNoNativePerformance} from './internals/Utilities';
+import MemoryInfo from './MemoryInfo';
 import ReactNativeStartupTiming from './ReactNativeStartupTiming';
 import NativePerformance from './specs/NativePerformance';
 import {PerformanceMark, PerformanceMeasure} from './UserTiming';
-import {warnNoNativePerformance} from './Utilities';
 
 declare var global: {
   // This value is defined directly via JSI, if available.
@@ -115,9 +115,6 @@ export default class Performance {
         markName,
         markOptions?.startTime,
       );
-    } else if (NativePerformance?.mark) {
-      computedStartTime = markOptions?.startTime ?? performance.now();
-      NativePerformance?.mark?.(markName, computedStartTime);
     } else {
       warnNoNativePerformance();
       computedStartTime = performance.now();
@@ -203,15 +200,6 @@ export default class Performance {
           startMarkName,
           endMarkName,
         );
-    } else if (NativePerformance?.measure) {
-      NativePerformance.measure(
-        measureName,
-        startTime,
-        endTime,
-        duration,
-        startMarkName,
-        endMarkName,
-      );
     } else {
       warnNoNativePerformance();
     }

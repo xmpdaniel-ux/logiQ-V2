@@ -2,9 +2,8 @@
     "build": {
         "production": {
             "android": {
-                "image": "ubuntu-22.04-jdk-17-ndk-r28",
-                "buildType": "app-bundle",
-                "ndk": "28.0.12433566"
+                "image": "latest",
+                "buildType": "app-bundle"
             },
             "env": {
                 "NODE_VERSION": "20.18.0",

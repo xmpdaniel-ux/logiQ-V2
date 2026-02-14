@@ -15,6 +15,7 @@
 #if RCT_ENABLE_INSPECTOR
 #import "RCTInspectorDevServerHelper.h"
 #endif
+#import <React/RCTInitializeUIKitProxies.h>
 #import <jsinspector-modern/InspectorFlags.h>
 #import <jsinspector-modern/InspectorInterfaces.h>
 #import <jsinspector-modern/ReactCdp.h>
@@ -313,6 +314,7 @@ RCT_NOT_IMPLEMENTED(-(instancetype)init)
 
 - (void)dealloc
 {
+  RCTBridge *batchedBridge = self.batchedBridge;
   /**
    * This runs only on the main thread, but crashes the subclass
    * RCTAssertMainQueue();
@@ -332,7 +334,17 @@ RCT_NOT_IMPLEMENTED(-(instancetype)init)
     RCTExecuteOnMainQueue(^{
       facebook::react::jsinspector_modern::getInspectorInstance().removePage(*inspectorPageId);
       inspectorPageId.reset();
-      inspectorTarget.reset();
+      // NOTE: RCTBridgeHostTargetDelegate holds a weak reference to RCTBridge.
+      // Conditionally call `inspectorTarget.reset()` to avoid a crash.
+      if (batchedBridge) {
+        [batchedBridge
+            dispatchBlock:^{
+              inspectorTarget.reset();
+            }
+                    queue:RCTJSThread];
+      } else {
+        inspectorTarget.reset();
+      }
     });
   }
 }
@@ -500,6 +512,7 @@ RCT_NOT_IMPLEMENTED(-(instancetype)init)
   _bundleURL = [RCTConvert NSURL:_bundleURL.absoluteString];
 
   RCTExecuteOnMainQueue(^{
+    RCTInitializeUIKitProxies();
     RCTRegisterReloadCommandListener(self);
     RCTReloadCommandSetBundleURL(self->_bundleURL);
   });
