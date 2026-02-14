@@ -10,6 +10,17 @@
                 "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
                 "EXPO_NO_TELEMETRY": "1"
             }
+        },
+        "preview": {
+            "android": {
+                "image": "latest",
+                "buildType": "apk"
+            },
+            "env": {
+                "NODE_VERSION": "20.18.0",
+                "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+                "EXPO_NO_TELEMETRY": "1"
+            }
         }
     },
     "submit": {
