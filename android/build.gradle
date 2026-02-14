@@ -8,14 +8,14 @@ buildscript {
         targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '34')
         kotlinVersion = findProperty('android.kotlinVersion') ?: '2.0.21'
 
-        ndkVersion = "28.0.12433566"
+        ndkVersion = "27.1.12297006"
     }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath('com.android.tools.build:gradle:8.5.1')
+        classpath('com.android.tools.build:gradle')
         classpath('com.facebook.react:react-native-gradle-plugin')
         classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
     }
@@ -37,32 +37,5 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
-    }
-}
-
-// Global 16KB Alignment Injection (Owner of the Build Decision)
-subprojects {
-    def configure16KB = { project ->
-        if (project.hasProperty('android')) {
-            project.android {
-                if (project.hasProperty('externalNativeBuild') && project.externalNativeBuild.hasProperty('cmake')) {
-                    project.externalNativeBuild.cmake {
-                        arguments "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384", 
-                                  "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-z,max-page-size=16384"
-                    }
-                }
-                if (project.hasProperty('packaging')) {
-                    project.packaging.jniLibs.useLegacyPackaging = false
-                }
-            }
-        }
-    }
-
-    if (state.executed) {
-        configure16KB(it)
-    } else {
-        afterEvaluate {
-            configure16KB(it)
-        }
     }
 }

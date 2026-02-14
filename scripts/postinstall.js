@@ -78,7 +78,7 @@ if (fs.existsSync(workletDecoratorPath)) {
 
   // 1. Add <vector> include if missing
   if (!cppContent.includes('#include <vector>')) {
-    cppContent = cppContent.replace('#include "WorkletRuntimeDecorator.h"', '#include "WorkletRuntimeDecorator.h"\n#include <vector>');
+    cppContent = cppContent.replace('#include "WorkletRuntimeDecorator.h"', '#include "WorkletRuntimeDecorator.h"\\n#include <vector>');
   }
 
   // 2. Replace VLA with std::vector
@@ -104,120 +104,8 @@ const nativeReanimatedModulePath = path.join(__dirname, '..', 'node_modules', 'r
 if (fs.existsSync(nativeReanimatedModulePath)) {
   let content = fs.readFileSync(nativeReanimatedModulePath, 'utf8');
   if (!content.includes('pragma clang diagnostic ignored "-Wdeprecated-this-capture"')) {
-    content = content.replace('#include "NativeReanimatedModule.h"', '#include "NativeReanimatedModule.h"\n\n#pragma clang diagnostic push\n#pragma clang diagnostic ignored "-Wdeprecated-this-capture"');
+    content = content.replace('#include "NativeReanimatedModule.h"', '#include "NativeReanimatedModule.h"\\n\\n#pragma clang diagnostic push\\n#pragma clang diagnostic ignored "-Wdeprecated-this-capture"');
     fs.writeFileSync(nativeReanimatedModulePath, content, 'utf8');
     console.log('[postinstall] Patched NativeReanimatedModule.cpp (Supressed warnings)');
-  }
-}
-
-// --- Fix 8: Operation Scorched Earth - Recursive 16KB Patching ---
-const modulesToPatch = [
-  'react-native-reanimated',
-  'expo-modules-core',
-  'react-native-screens',
-  'react-native-gesture-handler',
-  'react-native-svg',
-  'react-native-safe-area-context',
-  'react-native-video', // If present
-  'react-native-image-picker' // If present
-];
-
-function findFiles(dir, filename, fileList = []) {
-  if (!fs.existsSync(dir)) return fileList;
-  const files = fs.readdirSync(dir);
-  for (const file of files) {
-    const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
-    if (stat.isDirectory()) {
-      if (file !== 'node_modules' && file !== '.git') {
-        findFiles(filePath, filename, fileList);
-      }
-    } else if (file === filename) {
-      fileList.push(filePath);
-    }
-  }
-  return fileList;
-}
-
-const patchFlag = 'add_link_options("-Wl,-z,max-page-size=16384")';
-const oldPatch = 'string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,-z,max-page-size=16384")';
-
-modulesToPatch.forEach(moduleName => {
-  const modulePath = path.join(__dirname, '..', 'node_modules', moduleName);
-  if (fs.existsSync(modulePath)) {
-    const cmakeFiles = findFiles(modulePath, 'CMakeLists.txt');
-    cmakeFiles.forEach(cmakePath => {
-      let content = fs.readFileSync(cmakePath, 'utf8');
-      let patched = false;
-
-      // Clean old patch
-      if (content.includes(oldPatch)) {
-        content = content.replace(oldPatch, '');
-        patched = true;
-      }
-
-      // Inject new patch
-      if (!content.includes('max-page-size=16384')) {
-        if (content.includes('cmake_minimum_required')) {
-          content = content.replace(/cmake_minimum_required\(.*\)/, '$&\n' + patchFlag);
-        } else {
-          content = patchFlag + '\n' + content;
-        }
-        patched = true;
-      }
-
-      if (patched) {
-        fs.writeFileSync(cmakePath, content, 'utf8');
-        console.log(`[postinstall] Patched 16KB Flag in: ${path.relative(path.join(__dirname, '..'), cmakePath)}`);
-      }
-    });
-  }
-});
-
-// --- Fix 9: Scorched Earth - Repair @expo/cli Internal Resolution ---
-const expoCliPath = path.join(__dirname, '..', 'node_modules', '@expo', 'cli', 'build');
-if (fs.existsSync(expoCliPath)) {
-  const jsFiles = findFiles(expoCliPath, '.js'); // Need a variation of findFiles or update yours
-  // Actually, I'll update findFiles to support extension matching or just use it.
-  
-  // Updated findFiles-like loop for .js files
-  const patchInternalImports = (dir) => {
-    const files = fs.readdirSync(dir);
-    for (const file of files) {
-      const filePath = path.join(dir, file);
-      const stat = fs.statSync(filePath);
-      if (stat.isDirectory()) {
-         patchInternalImports(filePath);
-      } else if (file.endsWith('.js')) {
-        let content = fs.readFileSync(filePath, 'utf8');
-        let altered = false;
-        
-        // Matches require("./something") or require("../something") without extension
-        // This is a surgical regex to add .js to internal relative requires
-        const requireRegex = /require\(\s*['"](\.\.?\/[^'"]+)(?<!\.js|[.\/])['"]\s*\)/g;
-        if (requireRegex.test(content)) {
-          content = content.replace(requireRegex, (match, p1) => {
-             // Verify if it's a file, not a directory
-             const targetPath = path.join(path.dirname(filePath), p1 + '.js');
-             if (fs.existsSync(targetPath)) {
-               altered = true;
-               return `require("${p1}.js")`;
-             }
-             return match;
-          });
-        }
-        
-        if (altered) {
-          fs.writeFileSync(filePath, content, 'utf8');
-        }
-      }
-    }
-  };
-  
-  try {
-    patchInternalImports(expoCliPath);
-    console.log('[postinstall] Applied scorched earth repair to @expo/cli imports');
-  } catch (e) {
-    console.error('[postinstall] Failed to apply scorched earth repair:', e.message);
   }
 }
