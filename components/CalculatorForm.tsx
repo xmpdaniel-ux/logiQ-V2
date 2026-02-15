@@ -13,6 +13,7 @@ import AIReportModal from './AIReportModal';
 import AIChatModal from './AIChatModal';
 import SubscriptionPaywall from './SubscriptionPaywall';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface CalculatorFormProps {
   category: 'business' | 'career' | 'relationship' | 'finance';
@@ -35,6 +36,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     handlePurchaseSuccess,
     refreshUserStatus
   } = usePremium();
+  const insets = useSafeAreaInsets();
 
   const [inputs, setInputs] = useState<FDUInput>({
     p1: 5,
@@ -344,7 +346,10 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <ScrollView
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+      contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
+    >
       <View style={styles.headerContainer}>
         <View style={{ width: 40 }} />
 

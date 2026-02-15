@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Modal, View, Text, StyleSheet, TouchableOpacity, 
-  ActivityIndicator, Platform, Dimensions, Alert 
+import {
+  Modal, View, Text, StyleSheet, TouchableOpacity,
+  ActivityIndicator, Platform, Dimensions, Alert
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Multi-language support
 const translations = {
@@ -92,9 +93,10 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
   const [purchaseState, setPurchaseState] = useState<'idle' | 'success' | 'error'>('idle');
-  
+
   const t = translations[language];
   const { width } = Dimensions.get('window');
+  const insets = useSafeAreaInsets();
 
   // Reset state when modal opens
   useEffect(() => {
@@ -110,7 +112,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
    */
   const handlePurchase = async (productId: string) => {
     setLoading(true);
-    
+
     try {
       // ============ GOOGLE PLAY BILLING INTEGRATION POINT ============
       // In production, replace this with actual Google Play Billing call:
@@ -121,17 +123,17 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       //   await verifyPurchaseWithBackend(productId, purchaseToken);
       //   onPurchaseSuccess();
       // }
-      
+
       // For now: Simulate purchase and call backend
       console.log(`Processing purchase for product: ${productId}`);
-      
+
       // Get device ID (in production use a proper device identifier)
-      const deviceId = Platform.OS === 'web' 
+      const deviceId = Platform.OS === 'web'
         ? 'web_' + Math.random().toString(36).substr(2, 9)
         : 'device_' + Math.random().toString(36).substr(2, 9);
-      
+
       const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:8001';
-      
+
       // Verify purchase with backend (simulated token for now)
       const response = await fetch(`${backendUrl}/api/user/verify-purchase`, {
         method: 'POST',
@@ -142,11 +144,11 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
           purchase_token: `simulated_token_${Date.now()}` // Replace with real token
         })
       });
-      
+
       if (!response.ok) throw new Error('Purchase verification failed');
-      
+
       const data = await response.json();
-      
+
       if (data.success && data.is_premium) {
         setPurchaseState('success');
         setTimeout(() => {
@@ -155,7 +157,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       } else {
         throw new Error('Purchase not verified');
       }
-      
+
     } catch (error) {
       console.error('Purchase error:', error);
       setPurchaseState('error');
@@ -170,7 +172,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       // In production: await Purchases.restorePurchases();
       console.log('Restoring purchases...');
       // For MVP: Show message
-      alert(language === 'es' 
+      alert(language === 'es'
         ? 'Esta función estará disponible cuando la app se publique'
         : 'This feature will be available when the app is published');
     } catch (error) {
@@ -204,7 +206,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
             <Ionicons name="alert-circle" size={60} color="#E74C3C" />
             <Text style={styles.errorTitle}>{t.errorTitle}</Text>
             <Text style={styles.errorMessage}>{t.errorMessage}</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.retryButton}
               onPress={() => setPurchaseState('idle')}
             >
@@ -219,7 +221,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: insets.bottom + 20 }]}>
           {/* Close Button */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Ionicons name="close" size={28} color="#7F8C8D" />
@@ -233,11 +235,11 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 <Text style={styles.alertText}>{t.outOfCredits}</Text>
               </View>
             )}
-            
+
             <View style={styles.iconContainer}>
-              <Ionicons name="diamond" size={48} color="#F1C40F" />
+              <MaterialCommunityIcons name="crown" size={48} color="#F1C40F" />
             </View>
-            
+
             <Text style={styles.title}>{t.title}</Text>
             <Text style={styles.subtitle}>{t.subtitle}</Text>
           </View>

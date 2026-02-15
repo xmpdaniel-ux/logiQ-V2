@@ -1,6 +1,7 @@
 /* --- LOGIQ PAYWALL ESTRATÉGICO v2.0 --- */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -53,7 +54,7 @@ export default function PaywallScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-        
+
         {/* HEADER ESTRATÉGICO */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -69,7 +70,7 @@ export default function PaywallScreen() {
         {/* COMPARATIVA DE VALOR (GRATIS VS PRO) */}
         <View style={styles.benefitsContainer}>
           <Text style={styles.benefitsTitle}>{t('BENEFITS_INCLUDED') || 'Tu Consultoría Integral'}</Text>
-          
+
           <View style={styles.benefitRow}>
             <View style={styles.iconCircle}>
               <Ionicons name="chatbubbles" size={20} color="#FFFFFF" />
@@ -107,7 +108,7 @@ export default function PaywallScreen() {
             <TouchableOpacity
               key={plan.id}
               style={[
-                styles.planCard, 
+                styles.planCard,
                 selectedPlan === plan.id && styles.planCardSelected,
                 plan.popular && styles.planCardPopular
               ]}
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 28, fontWeight: '900', color: '#2C3E50', textAlign: 'center' },
   subtitle: { fontSize: 16, color: '#7F8C8D', textAlign: 'center', marginTop: 8, paddingHorizontal: 20 },
-  
+
   benefitsContainer: { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 20, marginBottom: 25, elevation: 2 },
   benefitsTitle: { fontSize: 14, fontWeight: 'bold', color: '#BDC3C7', textTransform: 'uppercase', marginBottom: 20, letterSpacing: 1 },
   benefitRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
@@ -184,9 +185,9 @@ const styles = StyleSheet.create({
   benefitTextSub: { fontSize: 13, color: '#95A5A6' },
 
   plansContainer: { marginBottom: 20 },
-  planCard: { 
-    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 12, 
-    borderWidth: 2, borderColor: '#E0E0E0', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' 
+  planCard: {
+    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 12,
+    borderWidth: 2, borderColor: '#E0E0E0', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
   },
   planCardSelected: { borderColor: '#3498DB', backgroundColor: '#F0F9FF' },
   planCardPopular: { borderColor: '#F1C40F' },

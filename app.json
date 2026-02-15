@@ -4,7 +4,7 @@
     "slug": "logiq",
     "owner": "mrdeath2",
     "version": "2.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "splash": {
       "image": "./assets/images/splash-icon.png",
@@ -14,6 +14,11 @@
     "scheme": "logiq",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
+    "androidStatusBar": {
+      "barStyle": "light-content",
+      "backgroundColor": "#00000000",
+      "translucent": true
+    },
     "android": {
       "package": "com.logiq.app.pro",
       "versionCode": 101
