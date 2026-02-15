@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { TouchableOpacity, StyleSheet, Platform, View, Text, Alert } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -42,20 +42,12 @@ export default function TabLayout() {
           },
           headerRight: () => (
             <View style={styles.headerButtons}>
-              {!isPremium && (
-                <TouchableOpacity
-                  style={styles.premiumButton}
-                  onPress={() => router.push('/paywall')}
-                >
-                  <Ionicons name="diamond" size={14} color="#F1C40F" />
-                  <Text style={styles.premiumButtonText}>Premium</Text>
-                </TouchableOpacity>
-              )}
-              
+
+
               <TouchableOpacity
                 style={styles.helpButton}
                 onPress={() => {
-                  const title = t('HELP_MODAL_TITLE'); 
+                  const title = t('HELP_MODAL_TITLE');
                   const message = t('HELP_MODAL_CONTENT');
 
                   if (Platform.OS === 'web') {
@@ -71,41 +63,41 @@ export default function TabLayout() {
           ),
         }}
       >
-        <Tabs.Screen 
-          name="business" 
-          options={{ 
-            title: t('TAB_BUSINESS'), 
-            tabBarIcon: ({ color, size }) => <Ionicons name="briefcase" size={size} color={color} /> 
-          }} 
+        <Tabs.Screen
+          name="business"
+          options={{
+            title: t('TAB_BUSINESS'),
+            tabBarIcon: ({ color, size }) => <Ionicons name="briefcase" size={size} color={color} />
+          }}
         />
-        <Tabs.Screen 
-          name="career" 
-          options={{ 
-            title: t('TAB_CAREER'), 
-            tabBarIcon: ({ color, size }) => <Ionicons name="school" size={size} color={color} /> 
-          }} 
+        <Tabs.Screen
+          name="career"
+          options={{
+            title: t('TAB_CAREER'),
+            tabBarIcon: ({ color, size }) => <Ionicons name="school" size={size} color={color} />
+          }}
         />
-        <Tabs.Screen 
-          name="relationship" 
-          options={{ 
-            title: t('TAB_RELATIONSHIP'), 
-            tabBarIcon: ({ color, size }) => <Ionicons name="heart" size={size} color={color} /> 
-          }} 
+        <Tabs.Screen
+          name="relationship"
+          options={{
+            title: t('TAB_RELATIONSHIP'),
+            tabBarIcon: ({ color, size }) => <Ionicons name="heart" size={size} color={color} />
+          }}
         />
-        <Tabs.Screen 
-          name="finance" 
-          options={{ 
-            title: t('TAB_FINANCE'), 
-            tabBarIcon: ({ color, size }) => <Ionicons name="cash" size={size} color={color} /> 
-          }} 
+        <Tabs.Screen
+          name="finance"
+          options={{
+            title: t('TAB_FINANCE'),
+            tabBarIcon: ({ color, size }) => <Ionicons name="cash" size={size} color={color} />
+          }}
         />
-        <Tabs.Screen 
-          name="history" 
-          options={{ 
-            title: t('TAB_HISTORY'), 
-            headerShown: false, 
-            tabBarIcon: ({ color, size }) => <Ionicons name="time-outline" size={size} color={color} /> 
-          }} 
+        <Tabs.Screen
+          name="history"
+          options={{
+            title: t('TAB_HISTORY'),
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => <Ionicons name="time-outline" size={size} color={color} />
+          }}
         />
       </Tabs>
     </SafeAreaProvider>

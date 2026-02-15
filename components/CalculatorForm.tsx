@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput,
 import Slider from '@react-native-community/slider';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { FDUInput, FDUResult, Decision } from '../types';
 import { calculateFDU } from '../utils/fduCalculator';
 import { saveDecision } from '../utils/storage';
@@ -22,10 +22,10 @@ interface CalculatorFormProps {
 const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) => {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const { 
-    isPremium, 
+  const {
+    isPremium,
     reportCredits,
-    chatCredits, 
+    chatCredits,
     deviceId,
     showPaywall,
     paywallTrigger,
@@ -50,7 +50,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
   const [result, setResult] = useState<FDUResult | null>(null);
   const [context, setContext] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // AI Report states
   const [aiModalVisible, setAiModalVisible] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -82,7 +82,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
   }) => {
     try {
       const backendUrl = 'https://logiq-production.up.railway.app';
-      
+
       const payload = {
         id: decisionData.id, // Sincronizamos el ID
         device_id: decisionData.device_id,
@@ -116,18 +116,18 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
 
       setTimeout(() => {
         if (Platform.OS === 'web') {
-            if (window.confirm(`${t('REMINDER_TITLE')}\n\n${t('REMINDER_SAVE_MSG')}`)) {
-                handleSave(calculatedResult);
-            }
+          if (window.confirm(`${t('REMINDER_TITLE')}\n\n${t('REMINDER_SAVE_MSG')}`)) {
+            handleSave(calculatedResult);
+          }
         } else {
-            Alert.alert(
-              t('REMINDER_TITLE'),
-              t('REMINDER_SAVE_MSG'),
-              [
-                { text: t('BTN_LATER'), style: 'cancel' },
-                { text: t('BTN_SAVE_NOW'), style: 'default', onPress: () => handleSave(calculatedResult) },
-              ]
-            );
+          Alert.alert(
+            t('REMINDER_TITLE'),
+            t('REMINDER_SAVE_MSG'),
+            [
+              { text: t('BTN_LATER'), style: 'cancel' },
+              { text: t('BTN_SAVE_NOW'), style: 'default', onPress: () => handleSave(calculatedResult) },
+            ]
+          );
         }
       }, 600);
     } catch (error) {
@@ -168,10 +168,10 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         result: finalResult,
         context: context || undefined,
       };
-      
+
       // 1. Guardado local
       await saveDecision(decision);
-      
+
       // 2. Guardado en nube (Sincronizado)
       await saveToCloud({
         id: sharedId,
@@ -220,9 +220,9 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         aiReport,
         context: context || undefined,
       };
-      
+
       await saveDecision(decision);
-      
+
       await saveToCloud({
         id: sharedId,
         device_id: currentDeviceId,
@@ -260,7 +260,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     try {
       const backendUrl = 'https://logiq-production.up.railway.app';
       const currentDeviceId = await getDeviceId();
-      
+
       const response = await fetch(`${backendUrl}/api/generate-ai-report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -346,30 +346,26 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.headerContainer}>
-        <TouchableOpacity style={styles.premiumButton} onPress={() => setShowPaywall(true)}>
-          <Text style={styles.premiumButtonText}>{t('BTN_PREMIUM')}</Text>
-        </TouchableOpacity>
+        <View style={{ width: 40 }} />
 
         <Text style={styles.headerTitle}>{t(titleKey)}</Text>
 
-        <TouchableOpacity style={styles.helpButton} onPress={() => setAiModalVisible(true)}>
-          <Ionicons name="help-circle-outline" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
+        <View style={{ width: 40 }} />
       </View>
 
       {!isPremium && (
-        <TouchableOpacity 
-          style={styles.premiumBanner} 
+        <TouchableOpacity
+          style={styles.premiumBanner}
           onPress={() => setShowPaywall(true, 'manual')}
         >
           <View style={styles.premiumBannerLeft}>
-            <Ionicons name="diamond" size={28} color="#F1C40F" />
+            <MaterialCommunityIcons name="crown" size={28} color="#F1C40F" />
             <View style={styles.premiumBannerText}>
               <Text style={styles.premiumBannerTitle}>
                 {reportCredits > 0 || chatCredits > 0 ? t('PREMIUM_BANNER_TITLE') : t('UPGRADE_TITLE')}
               </Text>
               <Text style={styles.premiumBannerSubtitle}>
-                {reportCredits > 0 || chatCredits > 0 
+                {reportCredits > 0 || chatCredits > 0
                   ? `${reportCredits} ${t('CREDITS_REPORTS')} + ${chatCredits} ${t('CREDITS_CHATS')}`
                   : t('PREMIUM_BANNER_SUBTITLE')}
               </Text>
@@ -418,17 +414,9 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
       {result && (
         <>
           <ResultCard result={result} category={category} />
-          
-          <View style={styles.fduInfoBox}>
-            <View style={styles.fduInfoHeader}>
-              <Ionicons name="information-circle" size={18} color="#3498DB" />
-              <Text style={styles.fduInfoTitle}>{t('HELP_MODAL_TITLE')}</Text>
-            </View>
-            <Text style={styles.fduInfoText}>
-              {t('HELP_MODAL_CONTENT').split('\n')[0]}
-            </Text>
-          </View>
-          
+
+
+
           <View style={styles.actionButtonsContainer}>
             <TouchableOpacity style={styles.saveButton} onPress={() => handleSave()}>
               <Ionicons name="save" size={20} color="#FFFFFF" style={styles.buttonIcon} />

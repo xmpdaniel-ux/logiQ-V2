@@ -1,11 +1,16 @@
 {
   "expo": {
-    "name": "LogiQ V2",
+    "name": "LogiQ",
     "slug": "logiq",
     "owner": "mrdeath2",
     "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F172A"
+    },
     "scheme": "logiq",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
