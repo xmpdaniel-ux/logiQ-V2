@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { TouchableOpacity, StyleSheet, Platform, View, Text, Alert } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
 import { usePremium } from '../../contexts/PremiumContext';
 
 export default function TabLayout() {
@@ -14,7 +13,6 @@ export default function TabLayout() {
 
   return (
     <SafeAreaProvider style={{ flex: 1, backgroundColor: '#2C3E50' }}>
-      <StatusBar style="light" translucent />
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: '#3498DB',
