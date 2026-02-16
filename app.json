@@ -3,7 +3,7 @@
     "name": "LogiQ",
     "slug": "logiq",
     "owner": "mrdeath2",
-    "version": "2.0.0.3",
+    "version": "2.0.0.4",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "splash": {
@@ -16,11 +16,12 @@
     "newArchEnabled": false,
     "android": {
       "package": "com.logiq.app.pro",
-      "versionCode": 104
+      "versionCode": 105,
+      "edgeToEdgeEnabled": true
     },
     "ios": {
       "bundleIdentifier": "com.logiq.app.pro",
-      "buildNumber": "104"
+      "buildNumber": "105"
     },
     "plugins": [
       "expo-router",
