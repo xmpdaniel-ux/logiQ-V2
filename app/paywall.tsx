@@ -12,40 +12,21 @@ const { width } = Dimensions.get('window');
 export default function PaywallScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { handlePurchaseSuccess, deviceId } = usePremium();
+  const { handlePurchaseSuccess, deviceId, requestPurchase } = usePremium();
   const [loading, setLoading] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<string>('fdu_monthly'); // Default al de $5 para entrada rápida
+  const [selectedPlan, setSelectedPlan] = useState<string>('logiq_monthly_7'); // Default al de $7 para entrada rápida
 
   const plans = [
-    { id: 'fdu_monthly', title: t('PRICE_MONTH'), price: '$5.00', period: t('PER_MONTH'), savings: null },
-    { id: 'fdu_yearly', title: t('PRICE_YEAR'), price: '$45.00', period: t('PER_YEAR'), savings: t('PRICE_YEAR_SAVE'), popular: true },
-    { id: 'fdu_6months', title: t('PRICE_6M'), price: '$25.00', period: t('PER_6M'), savings: t('PRICE_6M_SAVE') },
+    { id: 'logiq_monthly_7', title: t('PRICE_MONTH') || 'Plan Mensual', price: '$7.00', period: t('PER_MONTH'), savings: null },
+    { id: 'logiq_annual_35', title: t('PRICE_YEAR') || 'Plan Anual (3 días gratis)', price: '$35.00', period: t('PER_YEAR'), savings: t('PRICE_YEAR_SAVE'), popular: true },
   ];
 
   const handlePurchase = async (productId: string) => {
     setLoading(true);
     try {
-      const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://tu-backend.railway.app';
-      const response = await fetch(`${backendUrl}/api/user/verify-purchase`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          device_id: deviceId || `temp_${Date.now()}`,
-          product_id: productId,
-          purchase_token: `simulated_${Date.now()}`
-        })
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          handlePurchaseSuccess();
-          Alert.alert(t('SUCCESS'), t('WELCOME_PREMIUM'), [{ text: 'OK', onPress: () => router.back() }]);
-        } else {
-          Alert.alert('Error', t('PURCHASE_FAILED'));
-        }
-      }
+      await requestPurchase(productId as any);
     } catch (error) {
-      Alert.alert('Error', t('CONNECTION_ERROR'));
+      console.error(error);
     } finally {
       setLoading(false);
     }

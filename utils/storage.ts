@@ -12,11 +12,11 @@ const storageGet = async (key: string): Promise<string | null> => {
   if (typeof window === 'undefined') {
     return null;
   }
-  
+
   if (Platform.OS === 'web' && window.localStorage) {
     return window.localStorage.getItem(key);
   }
-  
+
   try {
     return await AsyncStorage.getItem(key);
   } catch {
@@ -29,7 +29,7 @@ const storageSet = async (key: string, value: string): Promise<void> => {
   if (typeof window === 'undefined') {
     return;
   }
-  
+
   if (Platform.OS === 'web' && window.localStorage) {
     window.localStorage.setItem(key, value);
   } else {
@@ -46,7 +46,7 @@ const storageRemove = async (key: string): Promise<void> => {
   if (typeof window === 'undefined') {
     return;
   }
-  
+
   if (Platform.OS === 'web' && window.localStorage) {
     window.localStorage.removeItem(key);
   } else {
@@ -61,6 +61,14 @@ const storageRemove = async (key: string): Promise<void> => {
 export const saveDecision = async (decision: Decision): Promise<void> => {
   try {
     const existingHistory = await getHistory();
+
+    // Bloqueo para evitar doble guardado (verificar si el ID ya existe)
+    const alreadyExists = existingHistory.some(d => d.id === decision.id);
+    if (alreadyExists) {
+      console.log(`Decision with ID ${decision.id} already exists. Skipping save.`);
+      return;
+    }
+
     const updatedHistory = [decision, ...existingHistory];
     await storageSet(HISTORY_KEY, JSON.stringify(updatedHistory));
   } catch (error) {

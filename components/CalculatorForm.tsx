@@ -13,6 +13,7 @@ import AIReportModal from './AIReportModal';
 import AIChatModal from './AIChatModal';
 import SubscriptionPaywall from './SubscriptionPaywall';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as StoreReview from 'expo-store-review';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface CalculatorFormProps {
@@ -59,6 +60,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
   const [aiReport, setAiReport] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [chatModalVisible, setChatModalVisible] = useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
   // Función para obtener deviceId garantizado
   const getDeviceId = async (): Promise<string> => {
@@ -115,6 +117,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     try {
       const calculatedResult = calculateFDU(inputs);
       setResult(calculatedResult);
+      setCurrentSessionId(Date.now().toString());
 
       setTimeout(() => {
         if (Platform.OS === 'web') {
@@ -144,6 +147,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     });
     setResult(null);
     setContext('');
+    setCurrentSessionId(null);
   };
 
   const handleSave = async (resultOverride?: FDUResult) => {
@@ -160,7 +164,8 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     setIsSaving(true);
     try {
       const currentDeviceId = await getDeviceId();
-      const sharedId = Date.now().toString(); // ID Sincronizado
+      const sharedId = currentSessionId || Date.now().toString(); // Usar ID de sesión existente
+      if (!currentSessionId) setCurrentSessionId(sharedId);
 
       const decision: Decision = {
         id: sharedId,
@@ -211,7 +216,8 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     setIsSaving(true);
     try {
       const currentDeviceId = await getDeviceId();
-      const sharedId = Date.now().toString();
+      const sharedId = currentSessionId || Date.now().toString();
+      if (!currentSessionId) setCurrentSessionId(sharedId);
 
       const decision: Decision = {
         id: sharedId,
@@ -284,7 +290,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         const errorData = await response.json();
         if (errorData.detail?.error === 'out_of_credits') {
           setAiModalVisible(false);
-          setShowPaywall(true, 'out_of_credits');
+          setShowPaywall(true, 'out_of_report_credits');
           return;
         }
         throw new Error(t('MSG_ACCESS_DENIED'));
@@ -294,6 +300,18 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
 
       const data = await response.json();
       if (data.success && data.report) {
+        // 3. Incrementar contador de reportes para Growth Hacking
+        const reportCountStr = await AsyncStorage.getItem('@logiq_successful_reports');
+        const reportCount = reportCountStr ? parseInt(reportCountStr, 10) : 0;
+        const newCount = reportCount + 1;
+        await AsyncStorage.setItem('@logiq_successful_reports', newCount.toString());
+
+        if (newCount === 2) {
+          if (await StoreReview.hasAction()) {
+            StoreReview.requestReview();
+          }
+        }
+
         setAiReport(data.report);
         await refreshUserStatus();
       } else {
@@ -351,11 +369,8 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
       contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
     >
       <View style={styles.headerContainer}>
-        <View style={{ width: 40 }} />
-
+        <Text style={styles.brandTitle}>LogiQ</Text>
         <Text style={styles.headerTitle}>{t(titleKey)}</Text>
-
-        <View style={{ width: 40 }} />
       </View>
 
       {!isPremium && (
@@ -364,7 +379,6 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
           onPress={() => setShowPaywall(true, 'manual')}
         >
           <View style={styles.premiumBannerLeft}>
-            <MaterialCommunityIcons name="crown" size={28} color="#F1C40F" />
             <View style={styles.premiumBannerText}>
               <Text style={styles.premiumBannerTitle}>
                 {reportCredits > 0 || chatCredits > 0 ? t('PREMIUM_BANNER_TITLE') : t('UPGRADE_TITLE')}
@@ -453,6 +467,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         visible={chatModalVisible}
         initialReport={aiReport || ''}
         category={category}
+        sessionId={currentSessionId || ''}
         onClose={() => setChatModalVisible(false)}
       />
 
@@ -496,10 +511,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   headerTitle: {
+    color: '#BDC3C7',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  brandTitle: {
     color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-    flex: 1,
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: 1,
     textAlign: 'center',
   },
   helpButton: {

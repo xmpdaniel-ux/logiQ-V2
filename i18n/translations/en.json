@@ -12,7 +12,6 @@
   "P_TITULO_FIN": "Financial Risk Assessment",
   "P_TITULO_HIS": "Decision History",
   "P_TITULO_PAY": "Premium Subscription",
-
   "VAR_P1_NEG": "How likely is this business to succeed? (1-10)",
   "VAR_P2_NEG": "How favorable is the current market context? (1-10)",
   "VAR_U1_NEG": "How much financial benefit do you expect? (1-10)",
@@ -21,7 +20,6 @@
   "VAR_C2_NEG": "How much time will you dedicate to this? (1-10)",
   "VAR_R1_NEG": "How reversible is this decision? (1-10)",
   "VAR_R2_NEG": "What is the financial risk level? (1-10)",
-
   "VAR_P1_CAR": "Success probability in this professional decision? (1-10)",
   "VAR_P2_CAR": "How favorable is the timing for this change? (1-10)",
   "VAR_U1_CAR": "Financial stability or income improvement? (1-10)",
@@ -30,7 +28,6 @@
   "VAR_C2_CAR": "Impact on your current life (routine, home)? (1-10)",
   "VAR_R1_CAR": "How reversible is it if it fails? (1-10)",
   "VAR_R2_CAR": "Uncertainty or professional risk level? (1-10)",
-
   "VAR_P1_REL": "Likelihood of improving the relationship? (1-10)",
   "VAR_P2_REL": "Is this a favorable time to decide? (1-10)",
   "VAR_U1_REL": "How much family happiness will it bring? (1-10)",
@@ -39,7 +36,6 @@
   "VAR_C2_REL": "Adaptation time needed for everyone? (1-10)",
   "VAR_R1_REL": "How reversible is this family decision? (1-10)",
   "VAR_R2_REL": "Risk of conflict or regret? (1-10)",
-
   "VAR_P1_FIN": "Likelihood of achieving financial results? (1-10)",
   "VAR_P2_FIN": "How favorable is the economic context? (1-10)",
   "VAR_U1_FIN": "Improvement in personal finances? (1-10)",
@@ -48,7 +44,6 @@
   "VAR_C2_FIN": "Time required to see results? (1-10)",
   "VAR_R1_FIN": "How reversible is this financial decision? (1-10)",
   "VAR_R2_FIN": "Risk level of losing capital? (1-10)",
-
   "BTN_CALCULATE": "Calculate FDU",
   "BTN_SAVE": "Save Decision",
   "BTN_RESET": "Reset",
@@ -68,17 +63,14 @@
   "BTN_CONFIRM": "Confirm",
   "BTN_LATER": "Later",
   "BTN_SAVE_NOW": "Save Now",
-
   "RESULT_SCORE": "FDU Score",
   "RESULT_STATUS": "Verdict",
   "RESULT_UTILITY": "Total Utility",
   "RESULT_RISK": "Total Risk",
-
   "CATEGORY_BUSINESS": "Business",
   "CATEGORY_CAREER": "Career",
   "CATEGORY_RELATIONSHIP": "Relationship",
   "CATEGORY_FINANCE": "Finance",
-
   "FDU_STATUS_HIGH_RISK": "High Risk",
   "FDU_STATUS_CAUTION": "Caution",
   "FDU_STATUS_SOLID": "Solid Decision",
@@ -86,7 +78,6 @@
   "FDU_SOLID": "Solid",
   "FDU_INFO_TEXT": "FDU: 0-40 Risk | 41-70 Caution | 71-100 Solid",
   "FDU_ANALYSIS": "FDU Analysis",
-
   "STATUS_GREEN": "Recommendation: High Priority Execution",
   "STATUS_YELLOW": "Caution: Evaluate details further",
   "STATUS_RED": "High Risk: Not recommended",
@@ -102,7 +93,6 @@
   "STATUS_GREEN_FIN": "Solid financial decision. Stability is protected",
   "STATUS_YELLOW_FIN": "Viable, but ensure you have a contingency plan",
   "STATUS_RED_FIN": "High risk for your stability.",
-
   "HISTORY_EMPTY_TITLE": "History is empty",
   "HISTORY_EMPTY_MESSAGE": "Your decisions will appear here",
   "HISTORY_EMPTY_SUBTITLE": "Start analyzing and saving decisions to review them later.",
@@ -123,7 +113,6 @@
   "HISTORY_CLEARED_SUCCESS": "✅ History cleared successfully",
   "HISTORY_DELETE_ONE_TITLE": "Delete Decision",
   "HISTORY_DELETE_ONE_CONFIRM": "Delete this {{category}} decision?",
-
   "MSG_PREMIUM_CALL": "Unlock Pro History!",
   "MSG_PREMIUM_BENEFIT_1": "Unlimited history access",
   "MSG_PREMIUM_BENEFIT_2": "Save and compare all calculations",
@@ -138,14 +127,12 @@
   "MSG_CONNECTION_ERROR": "Server connection error.",
   "MSG_CALCULATION_ERROR": "Error processing data.",
   "MSG_AI_ERROR": "AI Mentor offline",
-
   "PRICE_MONTH": "$5.00 / Month",
   "PRICE_6M": "$25.00 / 6 Months",
   "PRICE_6M_SAVE": "(Save $5)",
   "PRICE_YEAR": "$45.00 / Year",
   "PRICE_YEAR_SAVE": "(Save $15)",
   "LANG_SELECTOR": "Language",
-
   "AI_REPORT_TITLE": "AI Strategic Report",
   "AI_GENERATING": "Generating strategic analysis...",
   "AI_ERROR": "Audit error",
@@ -155,7 +142,6 @@
   "CONTEXT_PLACEHOLDER_CAR": "Ex: Moving from sales to programming...",
   "CONTEXT_PLACEHOLDER_REL": "Ex: Getting married while doing my master's...",
   "CONTEXT_PLACEHOLDER_FIN": "Ex: Investing in crypto with current debts...",
-
   "CREDITS_REPORTS": "Reports",
   "CREDITS_CHATS": "Inquiries",
   "CREDITS_LEFT": "free AI analyses remaining 🎁",
@@ -164,7 +150,6 @@
   "LIMITED_OFFER": "Limited time offer",
   "USERS_JOINED": "+847 strategists joined this week",
   "BEST_VALUE": "BEST VALUE",
-
   "LABEL_UTILITY": "Utility",
   "LABEL_RISK": "Risk",
   "LABEL_UTILITY_REL": "Well-being/Peace",
@@ -172,25 +157,22 @@
   "LABEL_UTILITY_CAR": "Growth/Purpose",
   "LABEL_UTILITY_FIN": "Stability",
   "LABEL_RISK_FIN": "Protection",
-
   "AI_LOADING_1": "Understanding your situation...",
   "AI_LOADING_2": "Valuing your well-being...",
   "AI_LOADING_3": "Finding the best path...",
   "AI_LOADING_4": "Analyzing perspectives...",
   "REPORT_COPIED": "Report copied to clipboard",
   "COPIED_TITLE": "Copied",
-
   "OK": "OK",
   "ERROR": "ERROR",
   "SUCCESS": "SUCCESS",
   "LOADING": "Loading...",
   "HELP_MODAL_TITLE": "🧠 What is LogiQ?",
   "HELP_MODAL_CONTENT": "LogiQ uses the FDU method (Unified Decision Factor) to help you decide better.\n\n1️⃣ Choose a category\n2️⃣ Answer 8 variables\n3️⃣ Check the verdict\n4️⃣ Consult AI Mentor",
-
-  "PREMIUM_BANNER_TITLE": "💎 Unlock LogiQ Pro",
+  "PREMIUM_BANNER_TITLE": "👑 Unlock LogiQ Pro",
   "PREMIUM_BANNER_SUBTITLE": "Total access to strategic intelligence",
   "CHAT_WITH_IA": "Talk to LogiQ",
-  "CHAT_TITLE": "Strategic Consultant",
+  "CHAT_TITLE": "LogiQ - Your Strategist",
   "CHAT_PLACEHOLDER": "Type your question here...",
   "CHAT_HISTORY_TITLE": "Conversation History",
   "FDU_EXPLANATION_LONG": "FDU analyzes risks vs benefits to help you decide.",
@@ -199,7 +181,6 @@
   "RISK_LOW": "Solid",
   "VIEW_CONVERSATION": "View conversation",
   "NO_MESSAGES": "No messages",
-
   "CONFIRM_DELETE_TITLE": "Confirm deletion",
   "CONFIRM_DELETE_MESSAGE": "Are you sure? All data will be permanently deleted.",
   "SUCCESS_TITLE": "✅ Data deleted",
@@ -212,7 +193,6 @@
   "DELETE_ITEM_MESSAGE": "Delete this decision?",
   "REMINDER_TITLE": "Analysis Completed!",
   "REMINDER_SAVE_MSG": "Your FDU score is ready. Save it to history?",
-
   "CHAT_REMAINING_QUESTIONS": "{{count}} questions remaining",
   "CHAT_NO_QUESTIONS_LEFT": "Inquiries exhausted",
   "CHAT_THINKING": "The board is analyzing...",

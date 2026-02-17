@@ -70,26 +70,23 @@ const translations = {
 
 // Product IDs for Google Play
 const PRODUCT_IDS = {
-  MONTHLY: 'logiq_premium_mensual',
-  SEMI_ANNUAL: 'logiq_premium_semestral',
-  ANNUAL: 'logiq_premium_anual'
+  MONTHLY: 'logiq_monthly_7',
+  ANNUAL: 'logiq_annual_35'
 };
 
 interface SubscriptionPaywallProps {
   visible: boolean;
   onClose: () => void;
   onPurchaseSuccess: () => void;
-  trigger?: 'out_of_credits' | 'manual';
+  trigger?: 'out_of_report_credits' | 'out_of_chat_credits' | 'manual';
   language?: 'en' | 'es';
 }
 
-const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
-  visible,
-  onClose,
-  onPurchaseSuccess,
+onPurchaseSuccess,
   trigger = 'manual',
   language = 'es'
 }) => {
+  const { requestPurchase } = usePremium();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
   const [purchaseState, setPurchaseState] = useState<'idle' | 'success' | 'error'>('idle');
@@ -114,50 +111,11 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
     setLoading(true);
 
     try {
-      // ============ GOOGLE PLAY BILLING INTEGRATION POINT ============
-      // In production, replace this with actual Google Play Billing call:
-      //
-      // import Purchases from 'react-native-purchases';
-      // const { customerInfo } = await Purchases.purchaseProduct(productId);
-      // if (customerInfo.entitlements.active['premium']) {
-      //   await verifyPurchaseWithBackend(productId, purchaseToken);
-      //   onPurchaseSuccess();
-      // }
-
-      // For now: Simulate purchase and call backend
-      console.log(`Processing purchase for product: ${productId}`);
-
-      // Get device ID (in production use a proper device identifier)
-      const deviceId = Platform.OS === 'web'
-        ? 'web_' + Math.random().toString(36).substr(2, 9)
-        : 'device_' + Math.random().toString(36).substr(2, 9);
-
-      const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:8001';
-
-      // Verify purchase with backend (simulated token for now)
-      const response = await fetch(`${backendUrl}/api/user/verify-purchase`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          device_id: deviceId,
-          product_id: productId,
-          purchase_token: `simulated_token_${Date.now()}` // Replace with real token
-        })
-      });
-
-      if (!response.ok) throw new Error('Purchase verification failed');
-
-      const data = await response.json();
-
-      if (data.success && data.is_premium) {
-        setPurchaseState('success');
-        setTimeout(() => {
-          onPurchaseSuccess();
-        }, 2000);
-      } else {
-        throw new Error('Purchase not verified');
-      }
-
+      console.log(`Requesting purchase for: ${productId}`);
+      await requestPurchase(productId as any);
+      // Notar: El éxito se maneja vía purchaseUpdatedListener en PremiumContext
+      // que llamará a handlePurchaseSuccess() del contexto.
+      // Aquí cerramos si es exitoso (el listener disparará el refresh).
     } catch (error) {
       console.error('Purchase error:', error);
       setPurchaseState('error');

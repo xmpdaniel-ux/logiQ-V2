@@ -366,42 +366,42 @@ export default function HistoryScreen() {
   };
 
   const renderChatMessage = ({ item, index }: { item: ChatMessage; index: number }) => {
-  return (
-    <View key={`chat-group-${index}`} style={{ marginVertical: 4 }}>
-      {/* 1. Si existe mensaje de Usuario, renderiza su burbuja */}
-      {item.user && (
-        <View style={[styles.chatMessageContainer, styles.userMessageContainer]}>
-          <View style={[styles.chatBubble, styles.userBubble]}>
-            <Text style={[styles.chatMessageText, styles.userMessageText]}>
-              {item.user}
-            </Text>
-            {item.timestamp && (
-              <Text style={[styles.chatTimestamp, styles.userTimestamp]}>
-                {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+    return (
+      <View key={`chat-group-${index}`} style={{ marginVertical: 4 }}>
+        {/* 1. Si existe mensaje de Usuario, renderiza su burbuja */}
+        {item.user && (
+          <View style={[styles.chatMessageContainer, styles.userMessageContainer]}>
+            <View style={[styles.chatBubble, styles.userBubble]}>
+              <Text style={[styles.chatMessageText, styles.userMessageText]}>
+                {item.user}
               </Text>
-            )}
+              {item.timestamp && (
+                <Text style={[styles.chatTimestamp, styles.userTimestamp]}>
+                  {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Text>
+              )}
+            </View>
           </View>
-        </View>
-      )}
+        )}
 
-      {/* 2. Si existe mensaje de IA, renderiza su burbuja por separado */}
-      {item.ai && (
-        <View style={[styles.chatMessageContainer, styles.aiMessageContainer]}>
-          <View style={[styles.chatBubble, styles.aiBubble]}>
-            <Text style={[styles.chatMessageText, styles.aiMessageText]}>
-              {item.ai}
-            </Text>
-            {item.timestamp && (
-              <Text style={[styles.chatTimestamp, styles.aiTimestamp]}>
-                {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        {/* 2. Si existe mensaje de IA, renderiza su burbuja por separado */}
+        {item.ai && (
+          <View style={[styles.chatMessageContainer, styles.aiMessageContainer]}>
+            <View style={[styles.chatBubble, styles.aiBubble]}>
+              <Text style={[styles.chatMessageText, styles.aiMessageText]}>
+                {item.ai}
               </Text>
-            )}
+              {item.timestamp && (
+                <Text style={[styles.chatTimestamp, styles.aiTimestamp]}>
+                  {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Text>
+              )}
+            </View>
           </View>
-        </View>
-      )}
-    </View>
-  );
-};
+        )}
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -435,11 +435,19 @@ export default function HistoryScreen() {
         onRefresh={loadHistory}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Ionicons name="folder-open-outline" size={60} color="#DCDDE1" />
-            <Text style={styles.emptyText}>{t('HISTORY_EMPTY_TITLE') || 'No hay decisiones'}</Text>
+            <View style={styles.emptyIconContainer}>
+              <Ionicons name="bulb-outline" size={80} color="#3498DB" />
+            </View>
+            <Text style={styles.emptyTitle}>{t('HISTORY_EMPTY_PROMPT_TITLE') || 'Tu próxima gran decisión comienza aquí'}</Text>
             <Text style={styles.emptySubtext}>
-              {refreshing ? t('LOADING') || 'Cargando...' : t('HISTORY_EMPTY_MESSAGE') || 'Tus decisiones aparecerán aquí'}
+              {t('HISTORY_EMPTY_PROMPT_SUBTITLE') || 'Audita tu primer proyecto con el motor FDU.'}
             </Text>
+            <TouchableOpacity
+              style={styles.emptyButton}
+              onPress={() => {/* Navegar a home si fuera necesario, pero usualmente solo es texto motivador */ }}
+            >
+              <Text style={styles.emptyButtonText}>{t('BTN_START_FIRST_AUDIT') || 'Comenzar Auditoría'}</Text>
+            </TouchableOpacity>
           </View>
         }
       />
@@ -535,10 +543,10 @@ export default function HistoryScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F1F2F6' },
-  header: { 
-    backgroundColor: '#2C3E50', 
-    padding: 20, 
-    borderBottomLeftRadius: 20, 
+  header: {
+    backgroundColor: '#2C3E50',
+    padding: 20,
+    borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     elevation: 5,
     shadowColor: '#000',
@@ -561,26 +569,53 @@ const styles = StyleSheet.create({
   bigScore: { fontSize: 48, fontWeight: '900', marginRight: 10 },
   statusPill: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 },
   statusPillText: { color: '#FFF', fontSize: 12, fontWeight: 'bold' },
-  chatIndicator: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: '#E8F4F8', 
-    paddingHorizontal: 12, 
-    paddingVertical: 8, 
-    borderRadius: 10, 
+  chatIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F4F8',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
     marginBottom: 12,
     borderLeftWidth: 3,
     borderLeftColor: '#3498DB'
   },
-  chatIndicatorText: { 
-    fontSize: 12, 
-    fontWeight: '600', 
-    color: '#3498DB', 
-    marginLeft: 6 
+  chatIndicatorText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#3498DB',
+    marginLeft: 6
   },
-  empty: { flex: 1, alignItems: 'center', marginTop: 100 },
-  emptyText: { color: '#A4B0BE', marginTop: 10, fontWeight: '600' },
-  emptySubtext: { color: '#DCDDE1', fontSize: 12, marginTop: 5 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 100, paddingHorizontal: 40 },
+  emptyIconContainer: {
+    backgroundColor: '#EBF5FB',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  emptyTitle: {
+    color: '#2C3E50',
+    fontSize: 20,
+    fontWeight: '800',
+    textAlign: 'center',
+    marginBottom: 12
+  },
+  emptySubtext: { color: '#7F8C8D', fontSize: 15, textAlign: 'center', lineHeight: 22, marginBottom: 30 },
+  emptyButton: {
+    backgroundColor: '#3498DB',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+    elevation: 2,
+  },
+  emptyButtonText: {
+    color: '#FFF',
+    fontWeight: '700',
+    fontSize: 16,
+  },
 
   modalOverlay: {
     flex: 1,
@@ -718,22 +753,22 @@ const styles = StyleSheet.create({
     color: '#57606F',
     lineHeight: 18,
   },
-  reportIndicator: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: '#E8F4F8', 
-    paddingHorizontal: 12, 
-    paddingVertical: 8, 
-    borderRadius: 10, 
+  reportIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F4F8',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
     marginBottom: 12,
     borderLeftWidth: 3,
     borderLeftColor: '#3498DB'
   },
-  reportIndicatorText: { 
-    fontSize: 12, 
-    fontWeight: '600', 
-    color: '#3498DB', 
-    marginLeft: 6 
+  reportIndicatorText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#3498DB',
+    marginLeft: 6
   },
   reportContent: {
     padding: 15,
