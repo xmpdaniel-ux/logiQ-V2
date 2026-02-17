@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { usePremium } from '../contexts/PremiumContext';
 
 // Multi-language support
 const translations = {
@@ -82,7 +83,10 @@ interface SubscriptionPaywallProps {
   language?: 'en' | 'es';
 }
 
-onPurchaseSuccess,
+const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
+  visible,
+  onClose,
+  onPurchaseSuccess,
   trigger = 'manual',
   language = 'es'
 }) => {
@@ -130,9 +134,12 @@ onPurchaseSuccess,
       // In production: await Purchases.restorePurchases();
       console.log('Restoring purchases...');
       // For MVP: Show message
-      alert(language === 'es'
-        ? 'Esta función estará disponible cuando la app se publique'
-        : 'This feature will be available when the app is published');
+      Alert.alert(
+        language === 'es' ? 'Próximamente' : 'Coming Soon',
+        language === 'es'
+          ? 'Esta función estará disponible cuando la app se publique'
+          : 'This feature will be available when the app is published'
+      );
     } catch (error) {
       console.error('Restore error:', error);
     } finally {
@@ -187,7 +194,7 @@ onPurchaseSuccess,
 
           {/* Header */}
           <View style={styles.header}>
-            {trigger === 'out_of_credits' && (
+            {(trigger === 'out_of_report_credits' || trigger === 'out_of_chat_credits') && (
               <View style={styles.alertBadge}>
                 <Ionicons name="alert-circle" size={16} color="#FFFFFF" />
                 <Text style={styles.alertText}>{t.outOfCredits}</Text>
