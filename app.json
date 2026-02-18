@@ -16,7 +16,7 @@
     "newArchEnabled": false,
     "android": {
       "package": "com.logiq.app.pro",
-      "versionCode": 106,
+      "versionCode": 107,
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -25,7 +25,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.logiq.app.pro",
-      "buildNumber": "106"
+      "buildNumber": "107"
     },
     "plugins": [
       "expo-router",
