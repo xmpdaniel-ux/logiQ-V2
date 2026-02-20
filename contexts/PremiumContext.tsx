@@ -132,6 +132,10 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
         setChatCredits(999);
         setReportCredits(999);
         await AsyncStorage.setItem(PREMIUM_KEY, 'true');
+      } else {
+        // Purga de rastro de IDs antiguos o suscripciones expiradas
+        setIsPremium(false);
+        await AsyncStorage.removeItem(PREMIUM_KEY);
       }
       return hasActivePurchase;
     } catch (err) {
