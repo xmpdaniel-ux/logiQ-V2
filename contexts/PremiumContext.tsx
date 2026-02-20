@@ -30,7 +30,7 @@ interface PremiumContextType {
   refreshUserStatus: () => Promise<void>;
   handlePurchaseSuccess: () => void;
   getDeviceId: () => string;
-  requestPurchase: (sku: 'logiq_monthly_7' | 'logiq_annual_35') => Promise<void>;
+  requestPurchase: (sku: 'logiq-monthly-v2' | 'logiq-quarterly-v2' | 'logiq-annual-v2') => Promise<void>;
 }
 
 const PremiumContext = createContext<PremiumContextType | undefined>(undefined);
@@ -44,7 +44,7 @@ const getOrCreateDeviceId = async (): Promise<string> => {
     if (!deviceId) {
       // 2. Si no hay, sacamos el ID REAL del hardware (Android o iOS)
       if (Platform.OS === 'android') {
-        deviceId = Application.androidId;
+        deviceId = Application.getAndroidId();
       } else if (Platform.OS === 'ios') {
         deviceId = await Application.getIosIdForVendorAsync();
       } else {
@@ -122,7 +122,9 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
     try {
       const purchases = await IAP.getAvailablePurchases();
       const hasActivePurchase = purchases.some(p =>
-        p.productId === 'logiq_monthly_7' || p.productId === 'logiq_annual_35'
+        p.productId === 'logiq-monthly-v2' ||
+        p.productId === 'logiq-quarterly-v2' ||
+        p.productId === 'logiq-annual-v2'
       );
 
       if (hasActivePurchase) {
@@ -138,7 +140,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
-  const requestPurchase = async (sku: 'logiq_monthly_7' | 'logiq_annual_35') => {
+  const requestPurchase = async (sku: 'logiq-monthly-v2' | 'logiq-quarterly-v2' | 'logiq-annual-v2') => {
     try {
       await IAP.requestSubscription({ sku });
     } catch (err: any) {
@@ -248,11 +250,11 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const handlePurchaseSuccess = async () => {
     setIsPremium(true);
-    setShowPaywallState(false);
     setChatCredits(999); // Ilimitados para Pro
     setReportCredits(999);
     await AsyncStorage.setItem(PREMIUM_KEY, 'true');
-    await refreshUserStatus();
+    setShowPaywallState(false); // Cierre automático del Paywall
+    await refreshUserStatus(); // Sincronización forzada con el Backend
   };
 
   const getDeviceId = () => deviceId;

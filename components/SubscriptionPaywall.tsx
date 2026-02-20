@@ -6,73 +6,13 @@ import {
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePremium } from '../contexts/PremiumContext';
-
-// Multi-language support
-const translations = {
-  en: {
-    title: 'Unlock Unlimited Analysis',
-    subtitle: 'Make better decisions with AI-powered insights',
-    feature1: 'Unlimited AI Reports',
-    feature2: 'Premium Follow-up Chat',
-    feature3: 'Full Decision History',
-    feature4: 'Priority Support',
-    outOfCredits: 'You have used your free analysis',
-    getUnlimited: 'Get Unlimited Access',
-    priceLabel: 'Only',
-    perMonth: '/month',
-    bestValue: 'Best Value',
-    annual: 'Annual',
-    savePercent: 'Save 25%',
-    monthly: 'Monthly',
-    restore: 'Restore Purchases',
-    termsStart: 'By subscribing, you agree to our ',
-    terms: 'Terms of Service',
-    termsAnd: ' and ',
-    privacy: 'Privacy Policy',
-    cancel: 'Cancel anytime',
-    close: 'Maybe Later',
-    processing: 'Processing...',
-    successTitle: '🎉 Welcome to Premium!',
-    successMessage: 'You now have unlimited access to all features.',
-    errorTitle: 'Purchase Failed',
-    errorMessage: 'Please try again or contact support.',
-    tryAgain: 'Try Again'
-  },
-  es: {
-    title: 'Desbloquea Análisis Ilimitados',
-    subtitle: 'Toma mejores decisiones con IA avanzada',
-    feature1: 'Reportes de IA Ilimitados',
-    feature2: 'Chat Premium de Seguimiento',
-    feature3: 'Historial Completo',
-    feature4: 'Soporte Prioritario',
-    outOfCredits: 'Has usado tu análisis gratuito',
-    getUnlimited: 'Obtener Acceso Ilimitado',
-    priceLabel: 'Solo',
-    perMonth: '/mes',
-    bestValue: 'Mejor Valor',
-    annual: 'Anual',
-    savePercent: 'Ahorra 25%',
-    monthly: 'Mensual',
-    restore: 'Restaurar Compras',
-    termsStart: 'Al suscribirte, aceptas nuestros ',
-    terms: 'Términos de Servicio',
-    termsAnd: ' y ',
-    privacy: 'Política de Privacidad',
-    cancel: 'Cancela cuando quieras',
-    close: 'Quizás Después',
-    processing: 'Procesando...',
-    successTitle: '🎉 ¡Bienvenido a Premium!',
-    successMessage: 'Ahora tienes acceso ilimitado a todas las funciones.',
-    errorTitle: 'Error en la Compra',
-    errorMessage: 'Por favor intenta de nuevo o contacta soporte.',
-    tryAgain: 'Intentar de Nuevo'
-  }
-};
+import { useTranslation } from 'react-i18next'; // Added useTranslation import
 
 // Product IDs for Google Play
 const PRODUCT_IDS = {
-  MONTHLY: 'logiq_monthly_7',
-  ANNUAL: 'logiq_annual_35'
+  MONTHLY: 'logiq-monthly-v2',
+  QUARTERLY: 'logiq-quarterly-v2',
+  ANNUAL: 'logiq-annual-v2'
 };
 
 interface SubscriptionPaywallProps {
@@ -90,12 +30,12 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   trigger = 'manual',
   language = 'es'
 }) => {
+  const { t } = useTranslation(); // Replaced translations object with useTranslation hook
   const { requestPurchase } = usePremium();
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'quarterly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
   const [purchaseState, setPurchaseState] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const t = translations[language];
   const { width } = Dimensions.get('window');
   const insets = useSafeAreaInsets();
 
@@ -135,10 +75,8 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       console.log('Restoring purchases...');
       // For MVP: Show message
       Alert.alert(
-        language === 'es' ? 'Próximamente' : 'Coming Soon',
-        language === 'es'
-          ? 'Esta función estará disponible cuando la app se publique'
-          : 'This feature will be available when the app is published'
+        t('PAYWALL_COMING_SOON_TITLE'),
+        t('PAYWALL_COMING_SOON_MESSAGE')
       );
     } catch (error) {
       console.error('Restore error:', error);
@@ -154,8 +92,8 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
         <View style={styles.overlay}>
           <View style={styles.successContainer}>
             <Text style={styles.successEmoji}>🎉</Text>
-            <Text style={styles.successTitle}>{t.successTitle}</Text>
-            <Text style={styles.successMessage}>{t.successMessage}</Text>
+            <Text style={styles.successTitle}>{t('PAYWALL_SUCCESS_TITLE')}</Text>
+            <Text style={styles.successMessage}>{t('PAYWALL_SUCCESS_MESSAGE')}</Text>
           </View>
         </View>
       </Modal>
@@ -169,13 +107,13 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
         <View style={styles.overlay}>
           <View style={styles.errorContainer}>
             <Ionicons name="alert-circle" size={60} color="#E74C3C" />
-            <Text style={styles.errorTitle}>{t.errorTitle}</Text>
-            <Text style={styles.errorMessage}>{t.errorMessage}</Text>
+            <Text style={styles.errorTitle}>{t('PAYWALL_ERROR_TITLE')}</Text>
+            <Text style={styles.errorMessage}>{t('PAYWALL_ERROR_MESSAGE')}</Text>
             <TouchableOpacity
               style={styles.retryButton}
               onPress={() => setPurchaseState('idle')}
             >
-              <Text style={styles.retryButtonText}>{t.tryAgain}</Text>
+              <Text style={styles.retryButtonText}>{t('PAYWALL_TRY_AGAIN')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -197,7 +135,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
             {(trigger === 'out_of_report_credits' || trigger === 'out_of_chat_credits') && (
               <View style={styles.alertBadge}>
                 <Ionicons name="alert-circle" size={16} color="#FFFFFF" />
-                <Text style={styles.alertText}>{t.outOfCredits}</Text>
+                <Text style={styles.alertText}>{t('PAYWALL_OUT_OF_CREDITS')}</Text>
               </View>
             )}
 
@@ -205,13 +143,13 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               <MaterialCommunityIcons name="crown" size={48} color="#F1C40F" />
             </View>
 
-            <Text style={styles.title}>{t.title}</Text>
-            <Text style={styles.subtitle}>{t.subtitle}</Text>
+            <Text style={styles.title}>{t('PAYWALL_TITLE')}</Text>
+            <Text style={styles.subtitle}>{t('PAYWALL_SUBTITLE')}</Text>
           </View>
 
           {/* Features */}
           <View style={styles.featuresContainer}>
-            {[t.feature1, t.feature2, t.feature3, t.feature4].map((feature, index) => (
+            {[t('PAYWALL_FEAT_1'), t('PAYWALL_FEAT_2'), t('PAYWALL_FEAT_3'), t('PAYWALL_FEAT_4')].map((feature, index) => (
               <View key={index} style={styles.featureRow}>
                 <Ionicons name="checkmark-circle" size={24} color="#2ECC71" />
                 <Text style={styles.featureText}>{feature}</Text>
@@ -229,14 +167,29 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               ]}
               onPress={() => setSelectedPlan('annual')}
             >
-              <View style={styles.bestValueBadge}>
-                <Text style={styles.bestValueText}>{t.bestValue}</Text>
+              <View style={styles.trialBadge}>
+                <Text style={styles.trialBadgeText}>{t('PAYWALL_TRIAL_BADGE')}</Text>
               </View>
-              <Text style={styles.planName}>{t.annual}</Text>
-              <Text style={styles.planPrice}>$3.75</Text>
-              <Text style={styles.planPeriod}>{t.perMonth}</Text>
-              <Text style={styles.planSave}>{t.savePercent}</Text>
-              <Text style={styles.planBilled}>$44.99/año</Text>
+              <Text style={styles.planName}>{t('PAYWALL_ANNUAL')}</Text>
+              <Text style={styles.planPrice}>$41.99</Text>
+              <Text style={styles.planPeriod}>{t('PER_YEAR')}</Text>
+              <Text style={styles.planSave}>{t('PAYWALL_SAVE_PERCENT')}</Text>
+            </TouchableOpacity>
+
+            {/* Quarterly Plan */}
+            <TouchableOpacity
+              style={[
+                styles.planCard,
+                selectedPlan === 'quarterly' && styles.planCardSelected
+              ]}
+              onPress={() => setSelectedPlan('quarterly')}
+            >
+              <View style={styles.popularBadge}>
+                <Text style={styles.popularBadgeText}>{t('BEST_VALUE')}</Text>
+              </View>
+              <Text style={styles.planName}>{t('PAYWALL_QUARTERLY')}</Text>
+              <Text style={styles.planPrice}>$14.99</Text>
+              <Text style={styles.planPeriod}>{t('PER_QUARTER')}</Text>
             </TouchableOpacity>
 
             {/* Monthly Plan */}
@@ -247,9 +200,9 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               ]}
               onPress={() => setSelectedPlan('monthly')}
             >
-              <Text style={styles.planName}>{t.monthly}</Text>
-              <Text style={styles.planPrice}>$4.99</Text>
-              <Text style={styles.planPeriod}>{t.perMonth}</Text>
+              <Text style={styles.planName}>{t('PAYWALL_MONTHLY')}</Text>
+              <Text style={styles.planPrice}>$6.99</Text>
+              <Text style={styles.planPeriod}>{t('PER_MONTH')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -257,7 +210,9 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
           <TouchableOpacity
             style={styles.purchaseButton}
             onPress={() => handlePurchase(
-              selectedPlan === 'annual' ? PRODUCT_IDS.ANNUAL : PRODUCT_IDS.MONTHLY
+              selectedPlan === 'annual' ? PRODUCT_IDS.ANNUAL :
+                selectedPlan === 'quarterly' ? PRODUCT_IDS.QUARTERLY :
+                  PRODUCT_IDS.MONTHLY
             )}
             disabled={loading}
           >
@@ -265,31 +220,33 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               <ActivityIndicator color="#FFFFFF" />
             ) : (
               <>
-                <Text style={styles.purchaseButtonText}>{t.getUnlimited}</Text>
+                <Text style={styles.purchaseButtonText}>
+                  {selectedPlan === 'annual' ? t('PAYWALL_BTN_TRIAL') : t('PAYWALL_BTN_SUBSCRIBE')}
+                </Text>
                 <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
               </>
             )}
           </TouchableOpacity>
 
           {/* Cancel Info */}
-          <Text style={styles.cancelText}>{t.cancel}</Text>
+          <Text style={styles.cancelText}>{t('PAYWALL_CANCEL')}</Text>
 
           {/* Restore Purchases */}
           <TouchableOpacity onPress={handleRestorePurchases}>
-            <Text style={styles.restoreText}>{t.restore}</Text>
+            <Text style={styles.restoreText}>{t('PAYWALL_RESTORE')}</Text>
           </TouchableOpacity>
 
           {/* Terms */}
           <Text style={styles.termsText}>
-            {t.termsStart}
-            <Text style={styles.termsLink}>{t.terms}</Text>
-            {t.termsAnd}
-            <Text style={styles.termsLink}>{t.privacy}</Text>
+            {t('PAYWALL_TERMS_START')}
+            <Text style={styles.termsLink}>{t('PAYWALL_TERMS_LINK')}</Text>
+            {t('PAYWALL_TERMS_AND')}
+            <Text style={styles.termsLink}>{t('PAYWALL_PRIVACY_LINK')}</Text>
           </Text>
 
           {/* Maybe Later */}
           <TouchableOpacity onPress={onClose} style={styles.laterButton}>
-            <Text style={styles.laterText}>{t.close}</Text>
+            <Text style={styles.laterText}>{t('PAYWALL_CLOSE')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -401,10 +358,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
+    zIndex: 1,
   },
   bestValueText: {
     color: '#FFFFFF',
     fontSize: 11,
+    fontWeight: 'bold',
+  },
+  trialBadge: {
+    position: 'absolute',
+    top: -12,
+    backgroundColor: '#F1C40F',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 2,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+  },
+  trialBadgeText: {
+    color: '#1a1a2e',
+    fontSize: 9,
+    fontWeight: '900',
+  },
+  popularBadge: {
+    position: 'absolute',
+    top: -10,
+    backgroundColor: '#3498DB',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+    zIndex: 1,
+  },
+  popularBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
     fontWeight: 'bold',
   },
   planName: {

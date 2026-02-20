@@ -12,7 +12,7 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -86,6 +86,7 @@ const deduplicate = (history: Decision[]): Decision[] => {
 
 export default function HistoryScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [history, setHistory] = useState<Decision[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -444,7 +445,7 @@ export default function HistoryScreen() {
             </Text>
             <TouchableOpacity
               style={styles.emptyButton}
-              onPress={() => {/* Navegar a home si fuera necesario, pero usualmente solo es texto motivador */ }}
+              onPress={() => router.push('/(tabs)/business')}
             >
               <Text style={styles.emptyButtonText}>{t('BTN_START_FIRST_AUDIT') || 'Comenzar Auditoría'}</Text>
             </TouchableOpacity>

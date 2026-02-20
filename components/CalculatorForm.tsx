@@ -15,6 +15,7 @@ import SubscriptionPaywall from './SubscriptionPaywall';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as StoreReview from 'expo-store-review';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 interface CalculatorFormProps {
   category: 'business' | 'career' | 'relationship' | 'finance';
@@ -53,6 +54,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
   const [result, setResult] = useState<FDUResult | null>(null);
   const [context, setContext] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   // AI Report states
   const [aiModalVisible, setAiModalVisible] = useState(false);
@@ -398,6 +400,21 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
 
       <View style={styles.contextContainer}>
         <Text style={styles.contextLabel}>{t('CONTEXT_LABEL')}</Text>
+
+        {showTooltip && (
+          <Animated.View
+            entering={FadeIn.duration(400)}
+            exiting={FadeOut.duration(200)}
+            style={styles.tooltipBubble}
+          >
+            <View style={styles.tooltipContent}>
+              <Ionicons name="information-circle-outline" size={16} color="#3498DB" />
+              <Text style={styles.tooltipText}>{t(`TOOLTIP_DESC_${prefix}`)}</Text>
+            </View>
+            <View style={styles.tooltipArrow} />
+          </Animated.View>
+        )}
+
         <TextInput
           style={styles.contextInput}
           multiline
@@ -406,6 +423,8 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
           placeholderTextColor="#95A5A6"
           value={context}
           onChangeText={setContext}
+          onFocus={() => setShowTooltip(true)}
+          onBlur={() => setShowTooltip(false)}
           maxLength={600}
         />
         <Text style={styles.charCount}>{context.length}/600</Text>
@@ -539,6 +558,48 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2C3E50',
     marginBottom: 8,
+  },
+  tooltipBubble: {
+    position: 'absolute',
+    top: -75,
+    left: 16,
+    right: 16,
+    zIndex: 100,
+  },
+  tooltipContent: {
+    backgroundColor: '#FFFFFF',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#3498DB',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  tooltipText: {
+    color: '#2C3E50',
+    fontSize: 12,
+    lineHeight: 16,
+    flex: 1,
+  },
+  tooltipArrow: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderTopWidth: 8,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: '#3498DB',
+    alignSelf: 'center',
+    marginTop: -1,
   },
   contextInput: {
     borderWidth: 1,

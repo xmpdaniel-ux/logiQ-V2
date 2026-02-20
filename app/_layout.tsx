@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { PremiumProvider } from '../contexts/PremiumContext';
 import { useTranslation } from 'react-i18next';
 import { requestNotificationPermissions, scheduleStrategicReminder } from '../utils/NotificationService';
+import { StatusBar } from 'expo-status-bar';
 import '../i18n';
 
 export default function RootLayout() {
@@ -21,6 +22,7 @@ export default function RootLayout() {
 
   return (
     <PremiumProvider>
+      <StatusBar style="light" translucent={true} />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
