@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Modal, View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Platform, Dimensions, Alert
+  ActivityIndicator, Platform, Dimensions, Alert, Linking
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,6 +35,16 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'quarterly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
   const [purchaseState, setPurchaseState] = useState<'idle' | 'success' | 'error'>('idle');
+
+  const LEGAL_URL = "https://docs.google.com/document/d/1_aW0aGiIHbtmh9gputLKX9iNDcz3xNHC7lHT7InMCg4/edit?usp=sharing";
+
+  const handleOpenLegal = async () => {
+    try {
+      await Linking.openURL(LEGAL_URL);
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo abrir el enlace legal.');
+    }
+  };
 
   const { width } = Dimensions.get('window');
   const insets = useSafeAreaInsets();
@@ -239,9 +249,9 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
           {/* Terms */}
           <Text style={styles.termsText}>
             {t('PAYWALL_TERMS_START')}
-            <Text style={styles.termsLink}>{t('PAYWALL_TERMS_LINK')}</Text>
+            <Text style={styles.termsLink} onPress={handleOpenLegal}>{t('PAYWALL_TERMS_LINK')}</Text>
             {t('PAYWALL_TERMS_AND')}
-            <Text style={styles.termsLink}>{t('PAYWALL_PRIVACY_LINK')}</Text>
+            <Text style={styles.termsLink} onPress={handleOpenLegal}>{t('PAYWALL_PRIVACY_LINK')}</Text>
           </Text>
 
           {/* Maybe Later */}
@@ -402,7 +412,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   planPrice: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#2C3E50',
   },
