@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { usePremium } from '../contexts/PremiumContext';
 
@@ -16,20 +16,19 @@ interface AIReportModalProps {
   category?: string;
 }
 
-const AIReportModal: React.FC<AIReportModalProps> = ({ 
-  visible, 
-  loading, 
-  report, 
-  error, 
+const AIReportModal: React.FC<AIReportModalProps> = ({
+  visible,
+  loading,
+  report,
+  error,
   onClose,
   onSaveWithReport,
   onOpenChat,
-  category 
+  category
 }) => {
-  const { t } = useTranslation();
-  const { isPremium } = usePremium();
+  const { isPremium, setShowPaywall } = usePremium();
   const [loadingMessage, setLoadingMessage] = useState(t('AI_LOADING_1'));
-  
+
   // Check if category is finance (supports multi-language: finance, finanzas, financiero)
   const categoryLower = category?.toLowerCase() || '';
   const isFinanceCategory = categoryLower.includes('finance') || categoryLower.includes('finan');
@@ -44,7 +43,7 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
       t('AI_LOADING_3'),
       t('AI_LOADING_4'),
     ];
-    
+
     let index = 0;
     const interval = setInterval(() => {
       index = (index + 1) % messages.length;
@@ -56,12 +55,12 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
 
   const handleCopyReport = async () => {
     if (!report) return;
-    
+
     try {
       // Usamos traducción dinámica en lugar de constante fija
       const disclaimer = t('FINANCE_LEGAL_DISCLAIMER');
       const textToCopy = isFinanceCategory ? report + '\n\n' + disclaimer : report;
-      
+
       await Clipboard.setStringAsync(textToCopy);
       Alert.alert('✅', t('REPORT_COPIED'));
     } catch (error) {
@@ -127,7 +126,7 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
             {report && !loading && !error && (
               <View style={styles.reportContainer}>
                 <Text style={styles.reportText}>{report}</Text>
-                
+
                 {/* Legal Disclaimer - Only for Finance category */}
                 {isFinanceCategory && (
                   <View style={styles.disclaimerContainer}>
@@ -141,12 +140,26 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
             )}
           </ScrollView>
 
+          {/* Botón de Conversión - Solo para NO Premium */}
+          {!isPremium && (
+            <TouchableOpacity
+              style={styles.subscribeButtonModal}
+              onPress={() => {
+                onClose();
+                setShowPaywall(true, 'manual');
+              }}
+            >
+              <MaterialCommunityIcons name="crown" size={20} color="#FFFFFF" />
+              <Text style={styles.subscribeButtonTextModal}>{t('BTN_SUBSCRIBE_NOW') || 'Plan Anual'}</Text>
+            </TouchableOpacity>
+          )}
+
           {/* Action Buttons */}
           {report && !loading && !error && (
             <View style={styles.actionButtons}>
               {/* Copy Button - Everyone */}
-              <TouchableOpacity 
-                style={styles.copyButton} 
+              <TouchableOpacity
+                style={styles.copyButton}
                 onPress={handleCopyReport}
               >
                 <Ionicons name="copy-outline" size={20} color="#3498DB" />
@@ -155,8 +168,8 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
 
               {/* Chat Button - Disponible para todos (créditos validados en backend) */}
               {onOpenChat && (
-                <TouchableOpacity 
-                  style={styles.chatButton} 
+                <TouchableOpacity
+                  style={styles.chatButton}
                   onPress={handleOpenChat}
                 >
                   <Ionicons name="chatbubbles" size={20} color="#FFFFFF" />
@@ -166,8 +179,8 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
 
               {/* Save Button - Solo Premium */}
               {isPremium && onSaveWithReport && (
-                <TouchableOpacity 
-                  style={styles.saveWithReportButton} 
+                <TouchableOpacity
+                  style={styles.saveWithReportButton}
                   onPress={handleSaveWithReport}
                 >
                   <Ionicons name="save" size={20} color="#FFFFFF" />
@@ -377,6 +390,24 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  subscribeButtonModal: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: '#1ABC9C', // Teal color for conversion
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    elevation: 3,
+  },
+  subscribeButtonTextModal: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '900',
   },
 });
 
