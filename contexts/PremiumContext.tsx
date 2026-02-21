@@ -144,10 +144,18 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
-  const requestPurchase = async (sku: 'logiq-monthly-v2' | 'logiq-quarterly-v2' | 'logiq-annual-v2') => {
+  const requestPurchase = async (sku: string, offerToken?: string) => {
     try {
-      await IAP.requestSubscription({ sku });
+      if (Platform.OS === 'android' && offerToken) {
+        await IAP.requestSubscription({
+          sku,
+          subscriptionOffers: [{ sku, offerToken }]
+        });
+      } else {
+        await IAP.requestSubscription({ sku });
+      }
     } catch (err: any) {
+      console.warn('Purchase Error:', err);
       Alert.alert('Error', err.message);
     }
   };

@@ -6,7 +6,8 @@ import {
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePremium } from '../contexts/PremiumContext';
-import { useTranslation } from 'react-i18next'; // Added useTranslation import
+import { useTranslation } from 'react-i18next';
+import * as IAP from 'react-native-iap'; // Direct IAP import for types and methods
 
 // Product IDs for Google Play
 const PRODUCT_IDS = {
@@ -35,6 +36,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'quarterly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
   const [purchaseState, setPurchaseState] = useState<'idle' | 'success' | 'error'>('idle');
+  const [subscriptions, setSubscriptions] = useState<any[]>([]); // To store available subscription offers
 
   const LEGAL_URL = "https://docs.google.com/document/d/1_aW0aGiIHbtmh9gputLKX9iNDcz3xNHC7lHT7InMCg4/edit?usp=sharing";
 
@@ -49,11 +51,25 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   const { width } = Dimensions.get('window');
   const insets = useSafeAreaInsets();
 
-  // Reset state when modal opens
+  // Reset state and fetch subscriptions when modal opens
   useEffect(() => {
     if (visible) {
       setPurchaseState('idle');
       setSelectedPlan('annual');
+
+      const fetchSubs = async () => {
+        try {
+          const skus = Object.values(PRODUCT_IDS);
+          const subs = await IAP.getSubscriptions({ skus });
+          setSubscriptions(subs);
+        } catch (err) {
+          console.warn('Error fetching subscriptions:', err);
+        }
+      };
+
+      if (Platform.OS === 'android') {
+        fetchSubs();
+      }
     }
   }, [visible]);
 
@@ -66,7 +82,22 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
 
     try {
       console.log(`Requesting purchase for: ${productId}`);
-      await requestPurchase(productId as any);
+
+      let offerToken = undefined;
+      if (Platform.OS === 'android') {
+        const sub = subscriptions.find(s => s.productId === productId);
+        if (sub?.subscriptionOfferDetails) {
+          // Buscamos la oferta que tenga periodo de prueba (price 0) o la primera disponible
+          const offer = sub.subscriptionOfferDetails.find((o: any) =>
+            o.pricingPhases.pricingPhaseList.some((p: any) => p.priceAmountMicros === '0')
+          ) || sub.subscriptionOfferDetails[0];
+
+          offerToken = offer?.offerToken;
+          console.log(`Using offerToken for Android: ${offerToken}`);
+        }
+      }
+
+      await requestPurchase(productId, offerToken);
       // Notar: El éxito se maneja vía purchaseUpdatedListener en PremiumContext
       // que llamará a handlePurchaseSuccess() del contexto.
       // Aquí cerramos si es exitoso (el listener disparará el refresh).
