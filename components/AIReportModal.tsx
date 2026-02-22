@@ -26,6 +26,7 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
   onOpenChat,
   category
 }) => {
+  const { t } = useTranslation();
   const { isPremium, setShowPaywall } = usePremium();
   const [loadingMessage, setLoadingMessage] = useState(t('AI_LOADING_1'));
 
