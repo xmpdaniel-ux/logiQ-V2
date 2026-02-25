@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Platform, ActivityIndicator } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -268,10 +268,10 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     setAiError(null);
 
     try {
-      const backendUrl = 'https://logiq-production.up.railway.app';
+      const backendUrl = 'https://logiq-production.up.railway.app/api'; // Sincronizado con history.tsx
       const currentDeviceId = await getDeviceId();
 
-      const response = await fetch(`${backendUrl}/api/generate-ai-report`, {
+      const response = await fetch(`${backendUrl}/generate-ai-report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -284,7 +284,11 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
           status: result.status,
           context: context || '',
           device_id: currentDeviceId,
-          language: i18n.language || 'es'
+          language: i18n.language || 'es',
+          // Instrucciones prioritarias para el motor de IA (FDU Enhancement)
+          detailed_analysis: true,
+          include_biases: true,
+          domain_context: category // Informamos al backend el dominio (Negocios, Carrera, etc)
         })
       });
 

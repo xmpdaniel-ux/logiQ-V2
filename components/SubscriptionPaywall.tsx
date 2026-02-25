@@ -92,7 +92,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
           console.log('Subscription data missing, attempting emergency fetch...');
           const emergencySubs = await IAP.getSubscriptions({ skus: [productId] });
           if (emergencySubs && emergencySubs.length > 0) {
-            const emergencySub = emergencySubs[0];
+            const emergencySub = emergencySubs[0] as any;
             if (emergencySub.subscriptionOfferDetails && emergencySub.subscriptionOfferDetails.length > 0) {
               const offer = emergencySub.subscriptionOfferDetails.find((o: any) =>
                 o.pricingPhases.pricingPhaseList.some((p: any) => p.priceAmountMicros === '0')
@@ -100,11 +100,12 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               offerToken = offer?.offerToken;
             }
           }
-        } else if (sub.subscriptionOfferDetails && sub.subscriptionOfferDetails.length > 0) {
+        } else if ((sub as any).subscriptionOfferDetails && (sub as any).subscriptionOfferDetails.length > 0) {
           // Buscamos la oferta que tenga periodo de prueba (price 0) o la primera disponible
-          const offer = sub.subscriptionOfferDetails.find((o: any) =>
+          const subAny = sub as any;
+          const offer = subAny.subscriptionOfferDetails.find((o: any) =>
             o.pricingPhases.pricingPhaseList.some((p: any) => p.priceAmountMicros === '0')
-          ) || sub.subscriptionOfferDetails[0];
+          ) || subAny.subscriptionOfferDetails[0];
 
           offerToken = offer?.offerToken;
         }
@@ -246,9 +247,15 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 <Text style={styles.trialBadgeText}>{t('PAYWALL_TRIAL_BADGE')}</Text>
               </View>
               <Text style={styles.planName}>{t('PAYWALL_ANNUAL')}</Text>
-              <Text style={styles.planPrice}>
-                {subscriptions.find(s => s.productId === PRODUCT_IDS.ANNUAL)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '...'}
-              </Text>
+              <View style={styles.priceContainer}>
+                {subscriptions.find(s => s.productId === PRODUCT_IDS.ANNUAL) ? (
+                  <Text style={styles.planPrice}>
+                    {subscriptions.find(s => s.productId === PRODUCT_IDS.ANNUAL)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice}
+                  </Text>
+                ) : (
+                  <ActivityIndicator size="small" color="#3498DB" />
+                )}
+              </View>
               <Text style={styles.planPeriod}>{t('PER_YEAR')}</Text>
               <Text style={styles.planSave}>{t('PAYWALL_SAVE_PERCENT')}</Text>
             </TouchableOpacity>
@@ -266,9 +273,15 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 <Text style={styles.popularBadgeText}>{t('BEST_VALUE')}</Text>
               </View>
               <Text style={styles.planName}>{t('PAYWALL_QUARTERLY')}</Text>
-              <Text style={styles.planPrice}>
-                {subscriptions.find(s => s.productId === PRODUCT_IDS.QUARTERLY)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '...'}
-              </Text>
+              <View style={styles.priceContainer}>
+                {subscriptions.find(s => s.productId === PRODUCT_IDS.QUARTERLY) ? (
+                  <Text style={styles.planPrice}>
+                    {subscriptions.find(s => s.productId === PRODUCT_IDS.QUARTERLY)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice}
+                  </Text>
+                ) : (
+                  <ActivityIndicator size="small" color="#3498DB" />
+                )}
+              </View>
               <Text style={styles.planPeriod}>{t('PER_QUARTER')}</Text>
             </TouchableOpacity>
 
@@ -282,9 +295,15 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               disabled={loading}
             >
               <Text style={styles.planName}>{t('PAYWALL_MONTHLY')}</Text>
-              <Text style={styles.planPrice}>
-                {subscriptions.find(s => s.productId === PRODUCT_IDS.MONTHLY)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '...'}
-              </Text>
+              <View style={styles.priceContainer}>
+                {subscriptions.find(s => s.productId === PRODUCT_IDS.MONTHLY) ? (
+                  <Text style={styles.planPrice}>
+                    {subscriptions.find(s => s.productId === PRODUCT_IDS.MONTHLY)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice}
+                  </Text>
+                ) : (
+                  <ActivityIndicator size="small" color="#3498DB" />
+                )}
+              </View>
               <Text style={styles.planPeriod}>{t('PER_MONTH')}</Text>
             </TouchableOpacity>
           </View>
@@ -360,7 +379,8 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
+    marginTop: 10,
   },
   alertBadge: {
     flexDirection: 'row',
@@ -380,59 +400,67 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 80,
     height: 80,
+    backgroundColor: '#1A1A2E',
     borderRadius: 40,
-    backgroundColor: '#1a1a2e',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2C3E50',
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#1A1A2E',
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: '#7F8C8D',
+    color: '#64748B',
     textAlign: 'center',
+    lineHeight: 22,
+    paddingHorizontal: 20,
   },
   featuresContainer: {
-    backgroundColor: '#F8F9FA',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 24,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
     gap: 12,
   },
   featureText: {
     fontSize: 15,
-    color: '#2C3E50',
+    color: '#334155',
+    fontWeight: '500',
     flex: 1,
   },
   pricingContainer: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   planCard: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     padding: 16,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: '#E2E8F0',
     position: 'relative',
   },
   planCardSelected: {
     borderColor: '#3498DB',
-    backgroundColor: '#EBF5FB',
+    backgroundColor: '#F0F9FF',
   },
   bestValueBadge: {
     position: 'absolute',
@@ -452,52 +480,62 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -12,
     backgroundColor: '#F1C40F',
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
     zIndex: 2,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#FFFFFF',
   },
   trialBadgeText: {
-    color: '#1a1a2e',
-    fontSize: 9,
+    color: '#1A1A2E',
+    fontSize: 10,
     fontWeight: '900',
   },
   popularBadge: {
     position: 'absolute',
-    top: -10,
+    top: -12,
     backgroundColor: '#3498DB',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 10,
-    zIndex: 1,
+    borderRadius: 12,
+    zIndex: 2,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   popularBadgeText: {
     color: '#FFFFFF',
     fontSize: 10,
     fontWeight: 'bold',
   },
+  priceContainer: {
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 4,
+  },
   planName: {
     fontSize: 14,
-    color: '#7F8C8D',
-    marginBottom: 8,
-    marginTop: 8,
+    fontWeight: '700',
+    color: '#64748B',
+    marginBottom: 4,
+    marginTop: 10,
   },
   planPrice: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#2C3E50',
+    fontWeight: '800',
+    color: '#1A1A2E',
   },
   planPeriod: {
-    fontSize: 13,
-    color: '#7F8C8D',
+    fontSize: 12,
+    color: '#94A3B8',
+    fontWeight: '500',
   },
   planSave: {
     fontSize: 12,
-    color: '#2ECC71',
-    fontWeight: '600',
-    marginTop: 4,
+    color: '#10B981',
+    fontWeight: '700',
+    marginTop: 6,
   },
   planBilled: {
     fontSize: 11,
@@ -509,39 +547,45 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    gap: 8,
+    paddingVertical: 18,
+    borderRadius: 16,
+    marginBottom: 16,
+    gap: 10,
+    elevation: 2,
+    shadowColor: '#3498DB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   purchaseButtonText: {
     color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '800',
   },
   cancelText: {
     textAlign: 'center',
-    color: '#95A5A6',
+    color: '#94A3B8',
     fontSize: 13,
     marginBottom: 16,
   },
   restoreText: {
     textAlign: 'center',
     color: '#3498DB',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 12,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 16,
   },
   termsText: {
     textAlign: 'center',
-    color: '#95A5A6',
+    color: '#94A3B8',
     fontSize: 11,
     lineHeight: 16,
-    marginBottom: 16,
+    paddingHorizontal: 10,
   },
   termsLink: {
     color: '#3498DB',
     textDecorationLine: 'underline',
+    fontWeight: '600',
   },
   laterButton: {
     alignItems: 'center',

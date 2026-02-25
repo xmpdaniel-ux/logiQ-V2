@@ -30,7 +30,7 @@ interface PremiumContextType {
   refreshUserStatus: () => Promise<void>;
   handlePurchaseSuccess: () => void;
   getDeviceId: () => string;
-  requestPurchase: (sku: 'logiq-monthly-v2' | 'logiq-quarterly-v2' | 'logiq-annual-v2') => Promise<void>;
+  requestPurchase: (sku: string, offerToken?: string) => Promise<void>;
 }
 
 const PremiumContext = createContext<PremiumContextType | undefined>(undefined);
