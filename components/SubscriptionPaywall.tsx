@@ -59,17 +59,17 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
 
       const fetchSubs = async () => {
         try {
+          console.log('Fetching subscriptions from store...');
           const skus = Object.values(PRODUCT_IDS);
           const subs = await IAP.getSubscriptions({ skus });
+          console.log(`Fetched ${subs.length} subscriptions`);
           setSubscriptions(subs);
         } catch (err) {
-          console.warn('Error fetching subscriptions:', err);
+          console.error('Error fetching subscriptions:', err);
         }
       };
 
-      if (Platform.OS === 'android') {
-        fetchSubs();
-      }
+      fetchSubs();
     }
   }, [visible]);
 
@@ -86,15 +86,33 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       let offerToken = undefined;
       if (Platform.OS === 'android') {
         const sub = subscriptions.find(s => s.productId === productId);
-        if (sub?.subscriptionOfferDetails) {
+
+        if (!sub) {
+          // Si no tenemos la suscripción cargada, intentamos recargarla al vuelo
+          console.log('Subscription data missing, attempting emergency fetch...');
+          const emergencySubs = await IAP.getSubscriptions({ skus: [productId] });
+          if (emergencySubs && emergencySubs.length > 0) {
+            const emergencySub = emergencySubs[0];
+            if (emergencySub.subscriptionOfferDetails && emergencySub.subscriptionOfferDetails.length > 0) {
+              const offer = emergencySub.subscriptionOfferDetails.find((o: any) =>
+                o.pricingPhases.pricingPhaseList.some((p: any) => p.priceAmountMicros === '0')
+              ) || emergencySub.subscriptionOfferDetails[0];
+              offerToken = offer?.offerToken;
+            }
+          }
+        } else if (sub.subscriptionOfferDetails && sub.subscriptionOfferDetails.length > 0) {
           // Buscamos la oferta que tenga periodo de prueba (price 0) o la primera disponible
           const offer = sub.subscriptionOfferDetails.find((o: any) =>
             o.pricingPhases.pricingPhaseList.some((p: any) => p.priceAmountMicros === '0')
           ) || sub.subscriptionOfferDetails[0];
 
           offerToken = offer?.offerToken;
-          console.log(`Using offerToken for Android: ${offerToken}`);
         }
+
+        if (!offerToken) {
+          throw new Error('No se pudo encontrar una oferta válida para esta suscripción (offerToken missing).');
+        }
+        console.log(`Using offerToken for Android: ${offerToken}`);
       }
 
       await requestPurchase(productId, offerToken);
