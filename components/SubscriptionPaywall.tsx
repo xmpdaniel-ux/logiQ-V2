@@ -229,7 +229,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               </View>
               <Text style={styles.planName}>{t('PAYWALL_ANNUAL')}</Text>
               <Text style={styles.planPrice}>
-                {subscriptions.find(s => s.productId === PRODUCT_IDS.ANNUAL)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '$41.99'}
+                {subscriptions.find(s => s.productId === PRODUCT_IDS.ANNUAL)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '...'}
               </Text>
               <Text style={styles.planPeriod}>{t('PER_YEAR')}</Text>
               <Text style={styles.planSave}>{t('PAYWALL_SAVE_PERCENT')}</Text>
@@ -249,7 +249,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               </View>
               <Text style={styles.planName}>{t('PAYWALL_QUARTERLY')}</Text>
               <Text style={styles.planPrice}>
-                {subscriptions.find(s => s.productId === PRODUCT_IDS.QUARTERLY)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '$14.99'}
+                {subscriptions.find(s => s.productId === PRODUCT_IDS.QUARTERLY)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '...'}
               </Text>
               <Text style={styles.planPeriod}>{t('PER_QUARTER')}</Text>
             </TouchableOpacity>
@@ -265,7 +265,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
             >
               <Text style={styles.planName}>{t('PAYWALL_MONTHLY')}</Text>
               <Text style={styles.planPrice}>
-                {subscriptions.find(s => s.productId === PRODUCT_IDS.MONTHLY)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '$6.99'}
+                {subscriptions.find(s => s.productId === PRODUCT_IDS.MONTHLY)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '...'}
               </Text>
               <Text style={styles.planPeriod}>{t('PER_MONTH')}</Text>
             </TouchableOpacity>
