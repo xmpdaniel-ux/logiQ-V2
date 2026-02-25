@@ -147,6 +147,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
   const requestPurchase = async (sku: string, offerToken?: string) => {
     try {
       if (Platform.OS === 'android' && offerToken) {
+        // En Android para la versión 5/6+ es crítico enviar el offerToken
         await IAP.requestSubscription({
           sku,
           subscriptionOffers: [{ sku, offerToken }]
@@ -156,7 +157,10 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
       }
     } catch (err: any) {
       console.warn('Purchase Error:', err);
-      Alert.alert('Error', err.message);
+      // Solo mostramos alerta si no es una cancelación del usuario
+      if (err?.code !== 'E_USER_CANCELLED') {
+        Alert.alert('Error', err.message);
+      }
     }
   };
 

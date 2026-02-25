@@ -112,15 +112,30 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   const handleRestorePurchases = async () => {
     setLoading(true);
     try {
-      // In production: await Purchases.restorePurchases();
       console.log('Restoring purchases...');
-      // For MVP: Show message
-      Alert.alert(
-        t('PAYWALL_COMING_SOON_TITLE'),
-        t('PAYWALL_COMING_SOON_MESSAGE')
+      const availablePurchases = await IAP.getAvailablePurchases();
+
+      const hasActivePurchase = availablePurchases.some(p =>
+        p.productId === PRODUCT_IDS.MONTHLY ||
+        p.productId === PRODUCT_IDS.QUARTERLY ||
+        p.productId === PRODUCT_IDS.ANNUAL
       );
-    } catch (error) {
+
+      if (hasActivePurchase) {
+        Alert.alert(
+          t('SUCCESS_TITLE') || '✅ Success',
+          t('RESTORE_SUCCESS_MESSAGE') || 'Tus suscripciones han sido restauradas.'
+        );
+        // handlePurchaseSuccess se encargará de actualizar el estado global si es necesario
+      } else {
+        Alert.alert(
+          t('RESTORE_EMPTY_TITLE') || 'Aviso',
+          t('RESTORE_EMPTY_MESSAGE') || 'No se encontraron suscripciones activas vinculadas a esta cuenta.'
+        );
+      }
+    } catch (error: any) {
       console.error('Restore error:', error);
+      Alert.alert('Error', error.message || 'Error al restaurar compras.');
     } finally {
       setLoading(false);
     }
@@ -207,12 +222,15 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 selectedPlan === 'annual' && styles.planCardSelected
               ]}
               onPress={() => setSelectedPlan('annual')}
+              disabled={loading}
             >
               <View style={styles.trialBadge}>
                 <Text style={styles.trialBadgeText}>{t('PAYWALL_TRIAL_BADGE')}</Text>
               </View>
               <Text style={styles.planName}>{t('PAYWALL_ANNUAL')}</Text>
-              <Text style={styles.planPrice}>$41.99</Text>
+              <Text style={styles.planPrice}>
+                {subscriptions.find(s => s.productId === PRODUCT_IDS.ANNUAL)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '$41.99'}
+              </Text>
               <Text style={styles.planPeriod}>{t('PER_YEAR')}</Text>
               <Text style={styles.planSave}>{t('PAYWALL_SAVE_PERCENT')}</Text>
             </TouchableOpacity>
@@ -224,12 +242,15 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 selectedPlan === 'quarterly' && styles.planCardSelected
               ]}
               onPress={() => setSelectedPlan('quarterly')}
+              disabled={loading}
             >
               <View style={styles.popularBadge}>
                 <Text style={styles.popularBadgeText}>{t('BEST_VALUE')}</Text>
               </View>
               <Text style={styles.planName}>{t('PAYWALL_QUARTERLY')}</Text>
-              <Text style={styles.planPrice}>$14.99</Text>
+              <Text style={styles.planPrice}>
+                {subscriptions.find(s => s.productId === PRODUCT_IDS.QUARTERLY)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '$14.99'}
+              </Text>
               <Text style={styles.planPeriod}>{t('PER_QUARTER')}</Text>
             </TouchableOpacity>
 
@@ -240,9 +261,12 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 selectedPlan === 'monthly' && styles.planCardSelected
               ]}
               onPress={() => setSelectedPlan('monthly')}
+              disabled={loading}
             >
               <Text style={styles.planName}>{t('PAYWALL_MONTHLY')}</Text>
-              <Text style={styles.planPrice}>$6.99</Text>
+              <Text style={styles.planPrice}>
+                {subscriptions.find(s => s.productId === PRODUCT_IDS.MONTHLY)?.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice || '$6.99'}
+              </Text>
               <Text style={styles.planPeriod}>{t('PER_MONTH')}</Text>
             </TouchableOpacity>
           </View>

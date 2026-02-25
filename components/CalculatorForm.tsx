@@ -440,11 +440,19 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
       {renderSlider('r2', `VAR_R2_${prefix}`)}
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.calculateButton} onPress={handleCalculate}>
+        <TouchableOpacity
+          style={[styles.calculateButton, isSaving && { opacity: 0.7 }]}
+          onPress={handleCalculate}
+          disabled={isSaving}
+        >
           <Text style={styles.buttonText}>{t('BTN_CALCULATE')}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
+        <TouchableOpacity
+          style={styles.resetButton}
+          onPress={handleReset}
+          disabled={isSaving}
+        >
           <Text style={styles.resetButtonText}>{t('BTN_RESET')}</Text>
         </TouchableOpacity>
       </View>
@@ -456,14 +464,34 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
 
 
           <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity style={styles.saveButton} onPress={() => handleSave()}>
-              <Ionicons name="save" size={20} color="#FFFFFF" style={styles.buttonIcon} />
-              <Text style={styles.buttonText}>{t('BTN_SAVE')}</Text>
+            <TouchableOpacity
+              style={[styles.saveButton, isSaving && { opacity: 0.7 }]}
+              onPress={() => handleSave()}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <>
+                  <Ionicons name="save" size={20} color="#FFFFFF" style={styles.buttonIcon} />
+                  <Text style={styles.buttonText}>{t('BTN_SAVE')}</Text>
+                </>
+              )}
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.aiButton} onPress={handleGenerateAIReport}>
-              <Ionicons name="sparkles" size={20} color="#FFFFFF" style={styles.buttonIcon} />
-              <Text style={styles.buttonText}>{t('BTN_AI_REPORT')}</Text>
+            <TouchableOpacity
+              style={[styles.aiButton, aiLoading && { opacity: 0.7 }]}
+              onPress={handleGenerateAIReport}
+              disabled={aiLoading}
+            >
+              {aiLoading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <>
+                  <Ionicons name="sparkles" size={20} color="#FFFFFF" style={styles.buttonIcon} />
+                  <Text style={styles.buttonText}>{t('BTN_AI_REPORT')}</Text>
+                </>
+              )}
             </TouchableOpacity>
           </View>
         </>
