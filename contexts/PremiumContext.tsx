@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { Platform, Alert } from 'react-native';
 import * as Application from 'expo-application';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -77,13 +77,24 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [showPaywall, setShowPaywallState] = useState(false);
   const [paywallTrigger, setPaywallTrigger] = useState<'out_of_report_credits' | 'out_of_chat_credits' | 'manual'>('manual');
 
+  const purchaseUpdateSubscription = useRef<IAP.PurchaseResult | any>(null);
+  const purchaseErrorSubscription = useRef<IAP.PurchaseError | any>(null);
+
   useEffect(() => {
     initializeUser();
     setupIAP().then(() => {
-      validateProStatus(); // Re-validar después de conectar
+      validateProStatus();
     });
 
     return () => {
+      if (purchaseUpdateSubscription.current) {
+        purchaseUpdateSubscription.current.remove();
+        purchaseUpdateSubscription.current = null;
+      }
+      if (purchaseErrorSubscription.current) {
+        purchaseErrorSubscription.current.remove();
+        purchaseErrorSubscription.current = null;
+      }
       IAP.endConnection();
     };
   }, []);
@@ -95,11 +106,15 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
         await IAP.flushFailedPurchasesCachedAsPendingAndroid();
       }
 
-      const purchaseUpdateSubscription = IAP.purchaseUpdatedListener(async (purchase) => {
+      // Evitar duplicidad si ya existen
+      if (purchaseUpdateSubscription.current) purchaseUpdateSubscription.current.remove();
+      if (purchaseErrorSubscription.current) purchaseErrorSubscription.current.remove();
+
+      purchaseUpdateSubscription.current = IAP.purchaseUpdatedListener(async (purchase) => {
+        console.log('purchaseUpdatedListener', purchase);
         const receipt = purchase.transactionReceipt;
         if (receipt) {
           try {
-            // Validamos y finalizamos la compra
             await IAP.finishTransaction({ purchase, isConsumable: false });
             handlePurchaseSuccess();
           } catch (ackErr) {
@@ -108,7 +123,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
       });
 
-      const purchaseErrorSubscription = IAP.purchaseErrorListener((error) => {
+      purchaseErrorSubscription.current = IAP.purchaseErrorListener((error) => {
         console.warn('purchaseErrorListener', error);
       });
 

@@ -117,12 +117,11 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       }
 
       await requestPurchase(productId, offerToken);
-      // Notar: El éxito se maneja vía purchaseUpdatedListener en PremiumContext
-      // que llamará a handlePurchaseSuccess() del contexto.
-      // Aquí cerramos si es exitoso (el listener disparará el refresh).
-    } catch (error) {
+    } catch (error: any) {
       console.error('Purchase error:', error);
-      setPurchaseState('error');
+      if (error?.code !== 'E_USER_CANCELLED') {
+        setPurchaseState('error');
+      }
     } finally {
       setLoading(false);
     }
