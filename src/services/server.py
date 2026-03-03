@@ -87,8 +87,8 @@ async def get_google_access_token():
     credentials.refresh(request)
     return credentials.token
 
-# ============== PLAY INTEGRITY VALIDATION ==============
-PLAY_INTEGRITY_DECODE_URL = f"https://androidintegrity.googleapis.com/v1/{GOOGLE_PACKAGE_NAME}:decodeIntegrityToken"
+# ============== PLAY INTEGRITY VALIDATION (DISABLED) ==============
+# PLAY_INTEGRITY_DECODE_URL = f"https://androidintegrity.googleapis.com/v1/{GOOGLE_PACKAGE_NAME}:decodeIntegrityToken"
 
 async def validate_play_integrity(integrity_token: str) -> bool:
     if not integrity_token or len(integrity_token.strip()) < 50:
@@ -230,7 +230,6 @@ class FDUReportRequest(BaseModel):
     device_id: str = ""
     hardware_fingerprint: Optional[str] = None
     language: str = "es"
-    integrity_token: str = Field(..., min_length=50)
 
 class AIFollowupRequest(BaseModel):
     category: str
@@ -239,13 +238,11 @@ class AIFollowupRequest(BaseModel):
     device_id: str = ""
     hardware_fingerprint: Optional[str] = None
     language: str = "es"
-    integrity_token: str = Field(..., min_length=50)
 
 class VerifyPurchaseRequest(BaseModel):
     device_id: str
     purchase_token: str
     product_id: str
-    integrity_token: str = Field(..., min_length=50)
     hardware_fingerprint: Optional[str] = None
 
 # ============== DISCLAIMER MULTILINGÜE ==============
@@ -511,8 +508,9 @@ async def purge_user_data(device_id: str):
 
 @api_router.post("/generate-ai-report")
 async def generate_ai_report(request: FDUReportRequest, background_tasks: BackgroundTasks):
-    if not await validate_play_integrity(request.integrity_token):
-        raise HTTPException(status_code=403, detail="Device integrity verification failed")
+    # Integrity check disabled for Build 117 (Plan 0)
+    # if not await validate_play_integrity(request.integrity_token):
+    #     raise HTTPException(status_code=403, detail="Device integrity verification failed")
 
     user = await get_or_create_user(request.device_id, request.hardware_fingerprint)
     unique_key = user['unique_key']
@@ -657,8 +655,9 @@ Interpret and incorporate the bias checks into the report sections in the output
 
 @api_router.post("/ai-followup")
 async def ai_followup(request: AIFollowupRequest, background_tasks: BackgroundTasks):
-    if not await validate_play_integrity(request.integrity_token):
-        raise HTTPException(status_code=403, detail="Device integrity verification failed")
+    # Integrity check disabled for Build 117 (Plan 0)
+    # if not await validate_play_integrity(request.integrity_token):
+    #     raise HTTPException(status_code=403, detail="Device integrity verification failed")
 
     user = await get_or_create_user(request.device_id, request.hardware_fingerprint)
     unique_key = user['unique_key']
@@ -721,8 +720,9 @@ Provide brief, empathetic responses focused on eliminating biases and offering c
 
 @api_router.post("/decisions/save")
 async def save_decision(request: FDUReportRequest):
-    if not await validate_play_integrity(request.integrity_token):
-        raise HTTPException(status_code=403, detail="Integrity check failed")
+    # Integrity check disabled for Build 117
+    # if not await validate_play_integrity(request.integrity_token):
+    #     raise HTTPException(status_code=403, detail="Integrity check failed")
    
     decision_data = {
         "device_id": request.device_id,

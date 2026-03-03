@@ -268,12 +268,17 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     setAiError(null);
 
     try {
-      const backendUrl = 'https://logiq-production.up.railway.app/api'; // Sincronizado con history.tsx
+      const backendUrl = 'https://logiq-production.up.railway.app/api'; 
       const currentDeviceId = await getDeviceId();
+
+      // Timeout guard: 25 seconds for AI generation
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
 
       const response = await fetch(`${backendUrl}/generate-ai-report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           category,
           p1: inputs.p1, p2: inputs.p2,
@@ -285,12 +290,13 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
           context: context || '',
           device_id: currentDeviceId,
           language: i18n.language || 'es',
-          // Instrucciones prioritarias para el motor de IA (FDU Enhancement)
           detailed_analysis: true,
           include_biases: true,
-          domain_context: category // Informamos al backend el dominio (Negocios, Carrera, etc)
+          domain_context: category 
         })
       });
+
+      clearTimeout(timeoutId);
 
       if (response.status === 403) {
         const errorData = await response.json();

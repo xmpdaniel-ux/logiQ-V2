@@ -98,7 +98,7 @@ const AIChatModal: React.FC<AIChatModalProps> = ({
     setLoading(true);
 
     try {
-      const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:8001';
+      const backendUrl = 'https://logiq-production.up.railway.app/api';
 
       const conversationHistory = messages.map(m => ({
         role: m.role,
@@ -106,17 +106,23 @@ const AIChatModal: React.FC<AIChatModalProps> = ({
       }));
       conversationHistory.push({ role: 'user', content: userMessage.content });
 
-      const response = await fetch(`${backendUrl}/api/ai-followup`, {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+      const response = await fetch(`${backendUrl}/ai-followup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           category,
           question: userMessage.content,
           conversation_history: conversationHistory,
-          device_id: deviceId,           // Enviado al backend
-          language: i18n.language,       // Idioma actual del usuario (ej: 'es', 'en')
+          device_id: deviceId,
+          language: i18n.language,
         }),
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
