@@ -60,7 +60,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
 
       const fetchSubs = async () => {
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('IAP Timeout')), 10000)
+          setTimeout(() => reject(new Error('Store connection timed out')), 7000)
         );
 
         try {
@@ -80,9 +80,13 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
             })(),
             timeoutPromise
           ]);
-        } catch (err) {
+        } catch (err: any) {
           console.error('Error fetching subscriptions:', err);
-          setStatusMessage(t('msg_store_error') || 'Error de conexión. Por favor, revisa tu internet o intenta más tarde');
+          const errMsg = err.message === 'Store connection timed out'
+            ? 'Store connection timed out. Please check your internet or try again.'
+            : (t('msg_store_error') || 'Error de conexión con la tienda.');
+
+          setStatusMessage(errMsg);
           setLoading(false);
         }
       };

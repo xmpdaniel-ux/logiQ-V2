@@ -81,7 +81,10 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
   const purchaseErrorSubscription = useRef<IAP.PurchaseError | any>(null);
 
   useEffect(() => {
+    // Parallel execution - No await chain
     initializeUser();
+
+    // Non-blocking IAP setup
     setupIAP().then(() => {
       validateProStatus();
     });
