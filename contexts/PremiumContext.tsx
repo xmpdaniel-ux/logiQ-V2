@@ -115,8 +115,24 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
         const receipt = purchase.transactionReceipt;
         if (receipt) {
           try {
-            await IAP.finishTransaction({ purchase, isConsumable: false });
-            handlePurchaseSuccess();
+            // Verify with backend
+            const response = await fetch(`${BACKEND_URL}/api/verify-purchase`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                device_id: deviceId,
+                purchase_token: purchase.purchaseToken,
+                product_id: purchase.productId,
+                hardware_fingerprint: null // Or however you handle it
+              })
+            });
+
+            if (response.ok) {
+              await IAP.finishTransaction({ purchase, isConsumable: false });
+              handlePurchaseSuccess();
+            } else {
+              console.warn('Backend verification failed');
+            }
           } catch (ackErr) {
             console.warn('ackErr', ackErr);
           }

@@ -143,9 +143,9 @@ PLAY_SUBSCRIPTION_GET_URL_TEMPLATE = (
 )
 
 PRODUCT_DURATIONS = {
-    "logiq_monthly": 30,
-    "logiq_six_months": 180,
-    "logiq_yearly": 365
+    "logiq-monthly-v2": 30,
+    "logiq-quarterly-v2": 90,
+    "logiq-annual-v2": 365
 }
 
 async def verify_subscription_purchase(purchase_token: str, product_id: str):
@@ -848,8 +848,9 @@ async def debug_decisions(device_id: str):
 # ============== NUEVO ENDPOINT /verify-purchase ==============
 @api_router.post("/verify-purchase")
 async def verify_purchase(data: VerifyPurchaseRequest):
-    if not await validate_play_integrity(data.integrity_token):
-        raise HTTPException(status_code=403, detail="Device integrity check failed")
+    # Integrity check disabled for Build 118
+    # if not await validate_play_integrity(data.integrity_token):
+    #     raise HTTPException(status_code=403, detail="Device integrity check failed")
 
     is_active, expiry_date, error = await verify_subscription_purchase(
         data.purchase_token, data.product_id

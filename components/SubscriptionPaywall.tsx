@@ -59,6 +59,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
 
       const fetchSubs = async () => {
         try {
+          await IAP.initConnection();
           console.log('Fetching subscriptions from store...');
           const skus = Object.values(PRODUCT_IDS);
           const subs = await IAP.getSubscriptions({ skus });
