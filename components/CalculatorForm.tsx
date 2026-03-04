@@ -268,12 +268,12 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     setAiError(null);
 
     try {
-      const backendUrl = 'https://logiq-production.up.railway.app/api'; 
+      const backendUrl = 'https://logiq-production.up.railway.app/api';
       const currentDeviceId = await getDeviceId();
 
-      // Timeout guard: 25 seconds for AI generation
+      // Timeout guard: 15 seconds for AI generation (User request for Build 120)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000);
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
 
       const response = await fetch(`${backendUrl}/generate-ai-report`, {
         method: 'POST',
@@ -292,7 +292,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
           language: i18n.language || 'es',
           detailed_analysis: true,
           include_biases: true,
-          domain_context: category 
+          domain_context: category
         })
       });
 
@@ -308,7 +308,11 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         throw new Error(t('MSG_ACCESS_DENIED'));
       }
 
-      if (!response.ok) throw new Error(`${t('ERROR')} ${response.status}`);
+      if (!response.ok) {
+        if (response.status === 404) throw new Error("Servidor no responde (404). Revisa tu conexión.");
+        if (response.status >= 500) throw new Error("Error interno del servidor. Inténtalo de nuevo más tarde.");
+        throw new Error(`${t('ERROR')} ${response.status}`);
+      }
 
       const data = await response.json();
       if (data.success && data.report) {
@@ -329,8 +333,13 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
       } else {
         throw new Error(t('MSG_NO_REPORT'));
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('MSG_CONNECTION_ERROR');
+    } catch (error: any) {
+      console.error('AI Report Error:', error);
+      const errorMessage = error.name === 'AbortError'
+        ? "El servidor está tardando demasiado. Por favor, revisa tu internet o intenta de nuevo."
+        : (error instanceof Error ? error.message : t('MSG_CONNECTION_ERROR'));
+
+      Alert.alert(t('ERROR'), errorMessage);
       setAiError(t('MSG_AI_ERROR') + ': ' + errorMessage);
     } finally {
       setAiLoading(false);

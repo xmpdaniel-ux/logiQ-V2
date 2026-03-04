@@ -36,6 +36,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'quarterly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
   const [purchaseState, setPurchaseState] = useState<'idle' | 'success' | 'error'>('idle');
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [subscriptions, setSubscriptions] = useState<any[]>([]); // To store available subscription offers
 
   const LEGAL_URL = "https://docs.google.com/document/d/1_aW0aGiIHbtmh9gputLKX9iNDcz3xNHC7lHT7InMCg4/edit?usp=sharing";
@@ -63,20 +64,25 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
         );
 
         try {
+          setStatusMessage(t('msg_connecting_store') || 'Conectando con la tienda...');
+          setLoading(true);
+
           await Promise.race([
             (async () => {
               await IAP.initConnection();
-              console.log('Fetching subscriptions from store...');
+              setStatusMessage(t('msg_loading_plans') || 'Cargando planes...');
               const skus = Object.values(PRODUCT_IDS);
               const subs = await IAP.getSubscriptions({ skus });
               console.log(`Fetched ${subs.length} subscriptions`);
               setSubscriptions(subs);
+              setLoading(false);
+              setStatusMessage(null);
             })(),
             timeoutPromise
           ]);
         } catch (err) {
           console.error('Error fetching subscriptions:', err);
-          // If loading fails, we don't block the UI forever
+          setStatusMessage(t('msg_store_error') || 'Error de conexión. Por favor, revisa tu internet o intenta más tarde');
           setLoading(false);
         }
       };
@@ -319,6 +325,22 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
             </TouchableOpacity>
           </View>
 
+          {loading && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator size="large" color="#6366f1" />
+              {statusMessage && (
+                <Text style={styles.statusText}>{statusMessage}</Text>
+              )}
+            </View>
+          )}
+          {!loading && statusMessage && (
+            <View style={styles.errorBanner}>
+              <Text style={styles.statusText}>{statusMessage}</Text>
+              <TouchableOpacity onPress={() => setStatusMessage(null)}>
+                <Text style={styles.closeErrorText}>[X]</Text>
+              </TouchableOpacity>
+            </View>
+          )}
           {/* Purchase Button */}
           <TouchableOpacity
             style={styles.purchaseButton}
@@ -407,6 +429,28 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '600',
+  },
+  statusText: {
+    color: '#94a3b8',
+    fontSize: 14,
+    marginTop: 12,
+    textAlign: 'center',
+    paddingHorizontal: 20
+  },
+  errorBanner: {
+    backgroundColor: '#ef444422',
+    padding: 10,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
+    marginHorizontal: 20
+  },
+  closeErrorText: {
+    color: '#ef4444',
+    fontWeight: 'bold',
+    marginLeft: 10
   },
   iconContainer: {
     width: 80,
@@ -607,6 +651,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   // Success & Error States
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+    borderRadius: 12
+  },
   successContainer: {
     backgroundColor: '#FFFFFF',
     margin: 32,

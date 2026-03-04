@@ -115,11 +115,14 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
         const receipt = purchase.transactionReceipt;
         if (receipt) {
           try {
-            // Verify with backend
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            // 1. Grant local access IMMEDIATELY (Mobile-first UX)
+            handlePurchaseSuccess();
 
-            const response = await fetch(`${BACKEND_URL}/api/verify-purchase`, {
+            // 2. Background verification (Don't block user)
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+            fetch(`${BACKEND_URL}/api/verify-purchase`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               signal: controller.signal,
@@ -129,16 +132,15 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
                 product_id: purchase.productId,
                 hardware_fingerprint: null
               })
+            }).then(resp => {
+              clearTimeout(timeoutId);
+              if (!resp.ok) console.warn('Background verification failed, but user has local access');
+            }).catch(e => {
+              clearTimeout(timeoutId);
+              console.warn('Background verification error (timeout or network):', e);
             });
 
-            clearTimeout(timeoutId);
-
-            if (response.ok) {
-              await IAP.finishTransaction({ purchase, isConsumable: false });
-              handlePurchaseSuccess();
-            } else {
-              console.warn('Backend verification failed');
-            }
+            await IAP.finishTransaction({ purchase, isConsumable: false });
           } catch (ackErr) {
             console.warn('ackErr', ackErr);
           }
