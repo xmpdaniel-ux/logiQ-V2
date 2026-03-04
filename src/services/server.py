@@ -143,9 +143,9 @@ PLAY_SUBSCRIPTION_GET_URL_TEMPLATE = (
 )
 
 PRODUCT_DURATIONS = {
-    "logiq-monthly-v2": 30,
-    "logiq-quarterly-v2": 90,
-    "logiq-annual-v2": 365
+    "logiq-monthly-v2": 31,
+    "logiq-quarterly-v2": 92,
+    "logiq-annual-v2": 366
 }
 
 async def verify_subscription_purchase(purchase_token: str, product_id: str):
@@ -231,6 +231,9 @@ class FDUReportRequest(BaseModel):
     hardware_fingerprint: Optional[str] = None
     language: str = "es"
 
+    class Config:
+        extra = "ignore"
+
 class AIFollowupRequest(BaseModel):
     category: str
     question: str
@@ -239,11 +242,17 @@ class AIFollowupRequest(BaseModel):
     hardware_fingerprint: Optional[str] = None
     language: str = "es"
 
+    class Config:
+        extra = "ignore"
+
 class VerifyPurchaseRequest(BaseModel):
     device_id: str
     purchase_token: str
     product_id: str
     hardware_fingerprint: Optional[str] = None
+
+    class Config:
+        extra = "ignore"
 
 # ============== DISCLAIMER MULTILINGÜE ==============
 def get_disclaimer(lang: str) -> str:

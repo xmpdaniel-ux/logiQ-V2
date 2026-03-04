@@ -58,15 +58,26 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       setSelectedPlan('annual');
 
       const fetchSubs = async () => {
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('IAP Timeout')), 10000)
+        );
+
         try {
-          await IAP.initConnection();
-          console.log('Fetching subscriptions from store...');
-          const skus = Object.values(PRODUCT_IDS);
-          const subs = await IAP.getSubscriptions({ skus });
-          console.log(`Fetched ${subs.length} subscriptions`);
-          setSubscriptions(subs);
+          await Promise.race([
+            (async () => {
+              await IAP.initConnection();
+              console.log('Fetching subscriptions from store...');
+              const skus = Object.values(PRODUCT_IDS);
+              const subs = await IAP.getSubscriptions({ skus });
+              console.log(`Fetched ${subs.length} subscriptions`);
+              setSubscriptions(subs);
+            })(),
+            timeoutPromise
+          ]);
         } catch (err) {
           console.error('Error fetching subscriptions:', err);
+          // If loading fails, we don't block the UI forever
+          setLoading(false);
         }
       };
 

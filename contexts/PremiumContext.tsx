@@ -116,16 +116,22 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (receipt) {
           try {
             // Verify with backend
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
             const response = await fetch(`${BACKEND_URL}/api/verify-purchase`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              signal: controller.signal,
               body: JSON.stringify({
                 device_id: deviceId,
                 purchase_token: purchase.purchaseToken,
                 product_id: purchase.productId,
-                hardware_fingerprint: null // Or however you handle it
+                hardware_fingerprint: null
               })
             });
+
+            clearTimeout(timeoutId);
 
             if (response.ok) {
               await IAP.finishTransaction({ purchase, isConsumable: false });
