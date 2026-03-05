@@ -74,10 +74,20 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               setStatusMessage(t('msg_loading_plans') || 'Cargando planes...');
 
               const primarySkus = Object.values(PRODUCT_IDS);
-              const legacySkus = primarySkus.map(s => s.replace('-v2', ''));
-              const allSkusToTry = [...new Set([...primarySkus, ...legacySkus])];
+              const variations = [
+                ...primarySkus,
+                ...primarySkus.map(s => s.replace('-v2', '')),
+                ...primarySkus.map(s => s.replace(/-/g, '_')),
+                'logiq_premium_monthly',
+                'logiq_premium_quarterly',
+                'logiq_premium_annual',
+                'logiq-premium-monthly',
+                'logiq-premium-quarterly',
+                'logiq-premium-annual'
+              ];
+              const allSkusToTry = [...new Set(variations)];
 
-              console.log(`Searching SKUs: ${allSkusToTry.join(', ')}`);
+              console.log(`Brute-force searching ${allSkusToTry.length} SKUs: ${allSkusToTry.join(', ')}`);
 
               let foundSubs: any[] = [];
               try {
