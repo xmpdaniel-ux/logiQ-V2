@@ -37,6 +37,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   const [loading, setLoading] = useState(false);
   const [purchaseState, setPurchaseState] = useState<'idle' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [chivatoLog, setChivatoLog] = useState<string | null>(null);
   const [subscriptions, setSubscriptions] = useState<any[]>([]); // To store available subscription offers
 
   const LEGAL_URL = "https://docs.google.com/document/d/1_aW0aGiIHbtmh9gputLKX9iNDcz3xNHC7lHT7InMCg4/edit?usp=sharing";
@@ -82,10 +83,15 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
           ]);
         } catch (err: any) {
           console.error('Error fetching subscriptions:', err);
-          const errMsg = err.message === 'Store connection timed out'
-            ? 'Store connection timed out. Please check your internet or try again.'
-            : (t('msg_store_error') || 'Error de conexión con la tienda.');
-
+          const nativeCode = err.code || 'NO_CODE';
+          const nativeMsg = err.message || 'Unknown Error';
+          
+          setChivatoLog(`[STORE ERROR]\nCode: ${nativeCode}\nMsg: ${nativeMsg}`);
+          
+          const errMsg = err.message === 'Store connection timed out' 
+            ? 'Store connection timed out. Please check your internet or try again.' 
+            : `Error de tienda (${nativeCode}): ${nativeMsg}`;
+          
           setStatusMessage(errMsg);
           setLoading(false);
         }
@@ -337,7 +343,22 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               )}
             </View>
           )}
-          {!loading && statusMessage && (
+          
+          {chivatoLog && (
+            <View style={styles.chivatoOverlay}>
+              <Ionicons name="bug" size={40} color="#FFFFFF" />
+              <Text style={styles.chivatoTitle}>DEBUG LOG (AND-IAP)</Text>
+              <Text style={styles.chivatoText}>{chivatoLog}</Text>
+              <TouchableOpacity 
+                style={styles.chivatoClose} 
+                onPress={() => setChivatoLog(null)}
+              >
+                <Text style={styles.chivatoCloseText}>CERRAR LOG</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {!loading && statusMessage && !chivatoLog && (
             <View style={styles.errorBanner}>
               <Text style={styles.statusText}>{statusMessage}</Text>
               <TouchableOpacity onPress={() => setStatusMessage(null)}>
@@ -662,6 +683,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 1000,
     borderRadius: 12
+  },
+  chivatoOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#ef4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    zIndex: 2000,
+    borderRadius: 12
+  },
+  chivatoTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '900',
+    marginBottom: 10
+  },
+  chivatoText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    textAlign: 'center',
+    marginBottom: 20
+  },
+  chivatoClose: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8
+  },
+  chivatoCloseText: {
+    color: '#ef4444',
+    fontWeight: 'bold'
   },
   successContainer: {
     backgroundColor: '#FFFFFF',
