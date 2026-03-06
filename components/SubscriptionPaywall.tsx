@@ -8,16 +8,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePremium } from '../contexts/PremiumContext';
 import { useTranslation } from 'react-i18next';
 import * as IAP from 'react-native-iap'; // Direct IAP import for types and methods
-import pkg from '../package.json';
-
-const APP_VERSION = pkg.version;
-
-// Product IDs for Google Play - Aligned with Console Discovery
 const PRODUCT_IDS = {
   MONTHLY: 'logiq_premium_monthly',
   QUARTERLY: 'logiq_premium_quarterly',
   ANNUAL: 'logiq_premium_annual'
 };
+
+const APP_VERSION_TAG = '2.0.2.9 (Build 133)';
 
 interface SubscriptionPaywallProps {
   visible: boolean;
@@ -79,18 +76,19 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               const primarySkus = Object.values(PRODUCT_IDS);
               const variations = [
                 ...primarySkus,
-                ...primarySkus.map(s => s.replace('-v2', '')),
-                ...primarySkus.map(s => s.replace(/-/g, '_')),
-                'logiq_premium_monthly',
-                'logiq_premium_quarterly',
-                'logiq_premium_annual',
-                'logiq-premium-monthly',
-                'logiq-premium-quarterly',
-                'logiq-premium-annual'
+                ...primarySkus.map(s => s.replace('premium', 'pro')),
+                ...primarySkus.map(s => s.replace('premium_', '')),
+                ...primarySkus.map(s => s.replace('_premium', '')),
+                'logiq_monthly', 'logiq_quarterly', 'logiq_annual',
+                'logiq_premium_monthly', 'logiq_premium_quarterly', 'logiq_premium_annual',
+                'logiq_pro_monthly', 'logiq_pro_quarterly', 'logiq_pro_annual',
+                'premium_monthly', 'premium_quarterly', 'premium_annual',
+                'logiq-premium-monthly', 'logiq-premium-quarterly', 'logiq-premium-annual',
+                'logiq_monthly_v2', 'logiq_quarterly_v2', 'logiq_annual_v2'
               ];
               const allSkusToTry = [...new Set(variations)];
 
-              setChivatoLog(`[INIT] Version: ${APP_VERSION}\nSearching ${allSkusToTry.length} SKUs...`);
+              setChivatoLog(`[INIT] Version: ${APP_VERSION_TAG}\nSearching ${allSkusToTry.length} SKUs...`);
               console.log(`Searching ${allSkusToTry.length} SKUs: ${allSkusToTry.join(', ')}`);
 
               let foundSubs: any[] = [];
@@ -444,7 +442,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               <Ionicons name="bug" size={40} color="#FFFFFF" />
               <Text style={styles.chivatoTitle}>DEBUG LOG (AND-IAP)</Text>
               <Text style={styles.chivatoText}>{chivatoLog}</Text>
-              <Text style={styles.chivatoVersion}>Build v{APP_VERSION}</Text>
+              <Text style={styles.chivatoVersion}>Build v{APP_VERSION_TAG}</Text>
               <TouchableOpacity
                 style={styles.chivatoClose}
                 onPress={() => setChivatoLog(null)}
