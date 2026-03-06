@@ -8,12 +8,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePremium } from '../contexts/PremiumContext';
 import { useTranslation } from 'react-i18next';
 import * as IAP from 'react-native-iap'; // Direct IAP import for types and methods
+import pkg from '../package.json';
 
-// Product IDs for Google Play
+const APP_VERSION = pkg.version;
+
+// Product IDs for Google Play - Aligned with Console Discovery
 const PRODUCT_IDS = {
-  MONTHLY: 'logiq-monthly-v2',
-  QUARTERLY: 'logiq-quarterly-v2',
-  ANNUAL: 'logiq-annual-v2'
+  MONTHLY: 'logiq_premium_monthly',
+  QUARTERLY: 'logiq_premium_quarterly',
+  ANNUAL: 'logiq_premium_annual'
 };
 
 interface SubscriptionPaywallProps {
@@ -87,24 +90,32 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               ];
               const allSkusToTry = [...new Set(variations)];
 
-              console.log(`Brute-force searching ${allSkusToTry.length} SKUs: ${allSkusToTry.join(', ')}`);
+              setChivatoLog(`[INIT] Version: ${APP_VERSION}\nSearching ${allSkusToTry.length} SKUs...`);
+              console.log(`Searching ${allSkusToTry.length} SKUs: ${allSkusToTry.join(', ')}`);
 
               let foundSubs: any[] = [];
               try {
                 // Try modern Subscriptions first
-                foundSubs = await IAP.getSubscriptions({ skus: allSkusToTry });
-              } catch (e) {
-                console.warn('getSubscriptions failed', e);
+                const subs = await IAP.getSubscriptions({ skus: allSkusToTry });
+                if (subs.length > 0) {
+                  const subNames = subs.map(s => `${(s as any).productId} (Sub)`).join(', ');
+                  foundSubs = [...foundSubs, ...subs];
+                  setChivatoLog(prev => `${prev}\n[FOUND SUBS] ${subNames}`);
+                }
+              } catch (e: any) {
+                console.log("getSubscriptions error (expected if empty):", e.message);
               }
 
-              if (foundSubs.length === 0) {
-                console.log('No subscriptions found, trying getProducts (fallback)...');
-                try {
-                  const products = await IAP.getProducts({ skus: allSkusToTry });
-                  foundSubs = products;
-                } catch (e) {
-                  console.warn('getProducts failed', e);
+              // Fallback to Products
+              try {
+                const prods = await IAP.getProducts({ skus: allSkusToTry });
+                if (prods.length > 0) {
+                  const prodNames = prods.map(p => `${(p as any).productId} (Prod)`).join(', ');
+                  foundSubs = [...foundSubs, ...prods];
+                  setChivatoLog(prev => `${prev}\n[FOUND PRODS] ${prodNames}`);
                 }
+              } catch (e: any) {
+                console.log("getProducts error:", e.message);
               }
 
               if (foundSubs.length === 0) {
@@ -154,19 +165,29 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
 
     try {
       console.log(`Requesting purchase for: ${productId}`);
+      let offerToken = undefined; // Declare offerToken here
 
-      let offerToken = undefined;
-      const sub = subscriptions.find(s => s.productId === productId);
+      // Logic to find the discovered SKU that matches the plan type
+      let matchingSub = subscriptions.find(s => s.productId === productId);
 
-      if (!sub) {
-        throw new Error(`SKU ${productId} no encontrado en la lista local.`);
+      if (!matchingSub) {
+        console.log(`Direct match failed for ${productId}, searching fuzzy...`);
+        const baseName = productId.split('-')[1]; // e.g. 'monthly' from 'logiq-monthly-v2'
+        matchingSub = subscriptions.find(s => s.productId.includes(baseName));
       }
 
-      const subAny = sub as any;
+      if (!matchingSub) {
+        throw new Error(`No se encontró ningún producto en la tienda para el plan: ${productId}`);
+      }
+
+      const subAny = matchingSub as any;
+      const realProductId = subAny.productId;
+      console.log(`Using discovered SKU: ${realProductId}`);
+
       if (subAny.subscriptionOfferDetails && subAny.subscriptionOfferDetails.length > 0) {
         // Intentar encontrar oferta con trial (solo para el plan anual idealmente)
         let offer = null;
-        if (productId === PRODUCT_IDS.ANNUAL) {
+        if (realProductId.includes('annual')) {
           offer = subAny.subscriptionOfferDetails.find((o: any) =>
             o.pricingPhases.pricingPhaseList.some((p: any) => p.priceAmountMicros === '0')
           );
@@ -178,11 +199,10 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       }
 
       if (!offerToken) {
-        throw new Error(`No offerToken for ${productId}. Details: ${JSON.stringify(subAny).substring(0, 100)}`);
+        throw new Error(`No offerToken for ${realProductId}. Details: ${JSON.stringify(subAny).substring(0, 100)}`);
       }
-      console.log(`Using offerToken for Android: ${offerToken}`);
 
-      await requestPurchase(productId, offerToken);
+      await requestPurchase(realProductId, offerToken);
     } catch (error: any) {
       console.error('Purchase error:', error);
       if (error?.code !== 'E_USER_CANCELLED') {
@@ -313,16 +333,23 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               </View>
               <Text style={styles.planName}>{t('PAYWALL_ANNUAL')}</Text>
               <View style={styles.priceContainer}>
-                {loading ? (
-                  <ActivityIndicator size="small" color="#3498DB" />
                 ) : (() => {
-                  const sub = subscriptions.find(s => s.productId === PRODUCT_IDS.ANNUAL || s.productId === PRODUCT_IDS.ANNUAL.replace('-v2', ''));
-                  if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
+                  const findSub = (key: 'monthly' | 'quarterly' | 'annual') => {
+                    return subscriptions.find(s => {
+                      const pid = s.productId.toLowerCase();
+                return pid.includes(key) && (pid.includes('logiq') || pid.includes('premium'));
+                    });
+                  };
 
-                  const price = (sub as any).subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice
-                    || (sub as any).localizedPrice
-                    || (sub as any).price;
-                  return <Text style={styles.planPrice}>{price || 'N/A'}</Text>;
+                const sub = findSub('annual');
+                if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
+
+                // Robust price extraction
+                const subAny = sub as any;
+                const price = subAny.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice
+                || subAny.localizedPrice
+                || subAny.price;
+                return <Text style={styles.planPrice}>{price || 'N/A'}</Text>;
                 })()}
               </View>
               <Text style={styles.planPeriod}>{t('PER_YEAR')}</Text>
@@ -346,12 +373,20 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 {loading ? (
                   <ActivityIndicator size="small" color="#3498DB" />
                 ) : (() => {
-                  const sub = subscriptions.find(s => s.productId === PRODUCT_IDS.QUARTERLY || s.productId === PRODUCT_IDS.QUARTERLY.replace('-v2', ''));
+                  const findSub = (key: 'monthly' | 'quarterly' | 'annual') => {
+                    return subscriptions.find(s => {
+                      const pid = s.productId.toLowerCase();
+                      return pid.includes(key) && (pid.includes('logiq') || pid.includes('premium'));
+                    });
+                  };
+
+                  const sub = findSub('quarterly');
                   if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
 
-                  const price = (sub as any).subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice
-                    || (sub as any).localizedPrice
-                    || (sub as any).price;
+                  const subAny = sub as any;
+                  const price = subAny.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice
+                    || subAny.localizedPrice
+                    || subAny.price;
                   return <Text style={styles.planPrice}>{price || 'N/A'}</Text>;
                 })()}
               </View>
@@ -372,12 +407,20 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 {loading ? (
                   <ActivityIndicator size="small" color="#3498DB" />
                 ) : (() => {
-                  const sub = subscriptions.find(s => s.productId === PRODUCT_IDS.MONTHLY || s.productId === PRODUCT_IDS.MONTHLY.replace('-v2', ''));
+                  const findSub = (key: 'monthly' | 'quarterly' | 'annual') => {
+                    return subscriptions.find(s => {
+                      const pid = s.productId.toLowerCase();
+                      return pid.includes(key) && (pid.includes('logiq') || pid.includes('premium'));
+                    });
+                  };
+
+                  const sub = findSub('monthly');
                   if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
 
-                  const price = (sub as any).subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice
-                    || (sub as any).localizedPrice
-                    || (sub as any).price;
+                  const subAny = sub as any;
+                  const price = subAny.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice
+                    || subAny.localizedPrice
+                    || subAny.price;
                   return <Text style={styles.planPrice}>{price || 'N/A'}</Text>;
                 })()}
               </View>
@@ -399,6 +442,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               <Ionicons name="bug" size={40} color="#FFFFFF" />
               <Text style={styles.chivatoTitle}>DEBUG LOG (AND-IAP)</Text>
               <Text style={styles.chivatoText}>{chivatoLog}</Text>
+              <Text style={styles.chivatoVersion}>Build v{APP_VERSION}</Text>
               <TouchableOpacity
                 style={styles.chivatoClose}
                 onPress={() => setChivatoLog(null)}
@@ -755,6 +799,12 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     textAlign: 'center',
     marginBottom: 20
+  },
+  chivatoVersion: {
+    color: '#FFFFFF88',
+    fontSize: 10,
+    marginTop: 10,
+    fontWeight: 'bold'
   },
   chivatoClose: {
     backgroundColor: '#FFFFFF',

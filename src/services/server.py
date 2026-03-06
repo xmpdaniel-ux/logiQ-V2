@@ -143,9 +143,22 @@ PLAY_SUBSCRIPTION_GET_URL_TEMPLATE = (
 )
 
 PRODUCT_DURATIONS = {
+    # Primary IDs
     "logiq-monthly-v2": 31,
     "logiq-quarterly-v2": 92,
-    "logiq-annual-v2": 366
+    "logiq-annual-v2": 366,
+    # Underscore variations
+    "logiq_monthly_v2": 31,
+    "logiq_quarterly_v2": 92,
+    "logiq_annual_v2": 366,
+    # Premium variations found in Console
+    "logiq_premium_monthly": 31,
+    "logiq_premium_quarterly": 92,
+    "logiq_premium_annual": 366,
+    # Legacy / Short variations
+    "logiq-monthly": 31,
+    "logiq-quarterly": 92,
+    "logiq-annual": 366,
 }
 
 async def verify_subscription_purchase(purchase_token: str, product_id: str):

@@ -164,9 +164,9 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
     try {
       const purchases = await IAP.getAvailablePurchases();
       const hasActivePurchase = purchases.some(p =>
-        p.productId === 'logiq-monthly-v2' ||
-        p.productId === 'logiq-quarterly-v2' ||
-        p.productId === 'logiq-annual-v2'
+        p.productId.includes('monthly') ||
+        p.productId.includes('quarterly') ||
+        p.productId.includes('annual')
       );
 
       if (hasActivePurchase) {

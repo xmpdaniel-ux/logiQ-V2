@@ -13,7 +13,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -95,10 +95,11 @@ export default function HistoryScreen() {
   const [selectedChat, setSelectedChat] = useState<ChatMessage[]>([]);
 
   const [reportModalVisible, setReportModalVisible] = useState(false);
-  const [selectedReportText, setSelectedReportText] = useState('');
+  const [selectedReportItem, setSelectedReportItem] = useState<Decision | null>(null);
 
-  const copyToClipboard = async (text: string) => {
-    await Clipboard.setStringAsync(text);
+  const copyToClipboard = async (text: string, score?: number) => {
+    const fullText = score ? `FDU Score: ${score.toFixed(1)}\n\n${text}` : text;
+    await Clipboard.setStringAsync(fullText);
     Alert.alert(t('COPIED_TITLE') || 'Copiado', t('COPIED_MESSAGE') || 'Reporte copiado al portapapeles.');
   };
 
@@ -292,10 +293,13 @@ export default function HistoryScreen() {
     return '#2ED573';
   };
 
-  const renderItem = ({ item }: { item: Decision }) => {
+  // Move to a memoized component for performance
+  const HistoryItem = React.memo(({ item, index }: { item: Decision; index: number }) => {
     const score = item.result?.score ?? 0;
     const color = getStatusColor(score);
     const date = new Date(item.created_at);
+    const dateStr = date.toLocaleDateString();
+    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const hasChatHistory = item.chat_history && item.chat_history.length > 0;
 
     return (
@@ -306,10 +310,10 @@ export default function HistoryScreen() {
             <Text style={styles.badgeText}>{t(`TAB_${item.category?.toUpperCase()}`)}</Text>
           </View>
           <Text style={styles.dateText}>
-            {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            {dateStr} {timeStr}
           </Text>
           <TouchableOpacity
-            style={{ padding: 15 }}
+            style={{ padding: 10 }}
             onPress={() => handleDeleteItem(item)}
           >
             <Ionicons name="trash-outline" size={18} color="#A4B0BE" />
@@ -328,14 +332,6 @@ export default function HistoryScreen() {
           </View>
         </View>
 
-        {item.ai_report && (
-          <View style={styles.reportSnippet}>
-            <Text style={styles.reportSnippetText} numberOfLines={3} ellipsizeMode="tail">
-              {item.ai_report}
-            </Text>
-          </View>
-        )}
-
         {hasChatHistory && (
           <TouchableOpacity
             style={styles.chatIndicator}
@@ -352,11 +348,12 @@ export default function HistoryScreen() {
           <TouchableOpacity
             style={styles.reportIndicator}
             onPress={() => {
-              setSelectedReportText(item.ai_report);
+              console.log("Opening AI Report Modal for item:", item.id);
+              setSelectedReportItem(item);
               setReportModalVisible(true);
             }}
           >
-            <Ionicons name="document-text-outline" size={16} color="#3498DB" />
+            <Ionicons name="ribbon-outline" size={16} color="#F1C40F" />
             <Text style={styles.reportIndicatorText}>
               {t('BTN_AI_REPORT') || 'Ver reporte IA'}
             </Text>
@@ -364,15 +361,19 @@ export default function HistoryScreen() {
         )}
       </View>
     );
-  };
+  });
+
+  const renderItem = useCallback(({ item, index }: { item: Decision; index: number }) => (
+    <HistoryItem item={item} index={index} />
+  ), [HistoryItem]);
 
   const renderChatMessage = ({ item, index }: { item: ChatMessage; index: number }) => {
     return (
-      <View key={`chat-group-${index}`} style={{ marginVertical: 4 }}>
-        {/* 1. Si existe mensaje de Usuario, renderiza su burbuja */}
+      <View key={`chat-group-${index}`} style={styles.chatMessageWrapper}>
+        {/* 1. User Message (Right) */}
         {item.user && (
           <View style={[styles.chatMessageContainer, styles.userMessageContainer]}>
-            <View style={[styles.chatBubble, styles.userBubble]}>
+            <View style={[styles.chatBubble, styles.userBubble, styles.elevatedBubble]}>
               <Text style={[styles.chatMessageText, styles.userMessageText]}>
                 {item.user}
               </Text>
@@ -382,13 +383,19 @@ export default function HistoryScreen() {
                 </Text>
               )}
             </View>
+            <View style={styles.userAvatarSmall}>
+              <Ionicons name="person" size={12} color="#FFF" />
+            </View>
           </View>
         )}
 
-        {/* 2. Si existe mensaje de IA, renderiza su burbuja por separado */}
+        {/* 2. AI Message (Left) */}
         {item.ai && (
           <View style={[styles.chatMessageContainer, styles.aiMessageContainer]}>
-            <View style={[styles.chatBubble, styles.aiBubble]}>
+            <View style={styles.aiAvatarSmall}>
+              <MaterialCommunityIcons name="robot" size={12} color="#FFF" />
+            </View>
+            <View style={[styles.chatBubble, styles.aiBubble, styles.elevatedBubble]}>
               <Text style={[styles.chatMessageText, styles.aiMessageText]}>
                 {item.ai}
               </Text>
@@ -509,25 +516,56 @@ export default function HistoryScreen() {
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
               <View style={styles.modalHeaderTitleRow}>
-                <Ionicons name="document-text" size={24} color="#3498DB" />
+                <Ionicons name="ribbon" size={24} color="#F1C40F" />
                 <Text style={styles.modalTitle}>{t('AI_REPORT_TITLE') || 'Reporte IA'}</Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity onPress={() => copyToClipboard(selectedReportText)} style={{ marginRight: 15 }}>
-                  <Ionicons name="copy-outline" size={24} color="#3498DB" />
-                </TouchableOpacity>
+                {selectedReportItem && (
+                  <TouchableOpacity
+                    onPress={() => copyToClipboard(selectedReportItem.ai_report, selectedReportItem.result.score)}
+                    style={{ marginRight: 15 }}
+                  >
+                    <Ionicons name="copy-outline" size={24} color="#3498DB" />
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity onPress={() => setReportModalVisible(false)}>
                   <Ionicons name="close-circle" size={28} color="#A4B0BE" />
                 </TouchableOpacity>
               </View>
             </View>
 
-            <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
-              <View style={styles.reportContent}>
-                <Text selectable={true} style={styles.reportTextContent}>
-                  {selectedReportText}
-                </Text>
-              </View>
+            <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false} contentContainerStyle={styles.chatScrollContent}>
+              {selectedReportItem && (
+                <View>
+                  {/* FDU Score Bubble */}
+                  <View style={[styles.chatMessageContainer, styles.aiMessageContainer]}>
+                    <View style={styles.aiAvatarSmall}>
+                      <MaterialCommunityIcons name="shield-check" size={12} color="#FFF" />
+                    </View>
+                    <View style={[styles.chatBubble, styles.aiBubble, styles.elevatedBubble, { borderColor: getStatusColor(selectedReportItem.result.score) }]}>
+                      <Text style={styles.fduLabel}>{t('RESULT_SCORE')}</Text>
+                      <Text style={[styles.bigScore, { color: getStatusColor(selectedReportItem.result.score), fontSize: 32 }]}>
+                        {selectedReportItem.result.score.toFixed(1)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Diagnosis Bubble */}
+                  <View style={[styles.chatMessageContainer, styles.aiMessageContainer]}>
+                    <View style={styles.aiAvatarSmall}>
+                      <MaterialCommunityIcons name="robot" size={12} color="#FFF" />
+                    </View>
+                    <View style={[styles.chatBubble, styles.aiBubble, styles.elevatedBubble]}>
+                      <Text style={[styles.chatMessageText, styles.aiMessageText]}>
+                        {selectedReportItem.ai_report}
+                      </Text>
+                      <Text style={[styles.chatTimestamp, styles.aiTimestamp]}>
+                        {new Date(selectedReportItem.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              )}
             </ScrollView>
 
             <View style={styles.modalFooter}>
@@ -639,30 +677,34 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingBottom: 15,
+    paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E8E8E8',
+    borderBottomColor: '#F1F2F6',
   },
   modalHeaderTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#2C3E50',
-    marginLeft: 10,
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1A1A2E',
+    marginLeft: 12,
   },
   modalContent: {
     flex: 1,
-    paddingHorizontal: 15,
+    backgroundColor: '#FFFFFF',
   },
   chatScrollContent: {
-    paddingVertical: 15,
+    padding: 20,
+  },
+  chatMessageWrapper: {
+    marginBottom: 20,
   },
   chatMessageContainer: {
-    marginVertical: 6,
     flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginVertical: 4,
   },
   userMessageContainer: {
     justifyContent: 'flex-end',
@@ -671,72 +713,101 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   chatBubble: {
-    maxWidth: '75%',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 18,
-    elevation: 1,
+    maxWidth: '80%',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
+  },
+  elevatedBubble: {
     shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   userBubble: {
-    backgroundColor: '#3498DB',
+    backgroundColor: '#6366F1',
     borderBottomRightRadius: 4,
+    marginRight: 8,
   },
   aiBubble: {
-    backgroundColor: '#F1F2F6',
+    backgroundColor: '#F8FAFC',
     borderBottomLeftRadius: 4,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  userAvatarSmall: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#818CF8',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  aiAvatarSmall: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#1E293B',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   chatMessageText: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 22,
   },
   userMessageText: {
-    color: '#FFF',
+    color: '#FFFFFF',
   },
   aiMessageText: {
-    color: '#2C3E50',
+    color: '#1E293B',
   },
   chatTimestamp: {
     fontSize: 10,
-    marginTop: 5,
-    fontWeight: '500',
+    marginTop: 6,
+    fontWeight: '600',
   },
   userTimestamp: {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: 'rgba(255, 255, 255, 0.6)',
     textAlign: 'right',
   },
   aiTimestamp: {
-    color: '#A4B0BE',
+    color: '#94A3B8',
   },
   emptyChatContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: 100,
   },
   emptyChatText: {
-    color: '#A4B0BE',
-    fontSize: 14,
-    marginTop: 10,
+    color: '#94A3B8',
+    fontSize: 15,
+    marginTop: 12,
+    fontWeight: '500',
   },
   modalFooter: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+    padding: 20,
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#E8E8E8',
+    borderTopColor: '#F1F2F6',
   },
   closeButton: {
-    backgroundColor: '#3498DB',
-    paddingVertical: 12,
-    borderRadius: 10,
+    backgroundColor: '#1A1A2E',
+    paddingVertical: 16,
+    borderRadius: 16,
     alignItems: 'center',
+    shadowColor: '#1A1A2E',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   closeButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
   },
 
   contextSection: {
