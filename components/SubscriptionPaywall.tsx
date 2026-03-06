@@ -9,9 +9,9 @@ import { usePremium } from '../contexts/PremiumContext';
 import { useTranslation } from 'react-i18next';
 import * as IAP from 'react-native-iap'; // Direct IAP import for types and methods
 const PRODUCT_IDS = {
-  MONTHLY: 'logiq_premium_monthly',
-  QUARTERLY: 'logiq_premium_quarterly',
-  ANNUAL: 'logiq_premium_annual'
+  MONTHLY: 'logiq-monthly-v2',
+  QUARTERLY: 'logiq-quarterly-v2',
+  ANNUAL: 'logiq-annual-v2'
 };
 
 const APP_VERSION_TAG = '2.0.2.9 (Build 133)';
@@ -73,27 +73,14 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               await IAP.initConnection();
               setStatusMessage(t('msg_loading_plans') || 'Cargando planes...');
 
-              const primarySkus = Object.values(PRODUCT_IDS);
-              const variations = [
-                ...primarySkus,
-                ...primarySkus.map(s => s.replace('premium', 'pro')),
-                ...primarySkus.map(s => s.replace('premium_', '')),
-                ...primarySkus.map(s => s.replace('_premium', '')),
-                'logiq_monthly', 'logiq_quarterly', 'logiq_annual',
-                'logiq_premium_monthly', 'logiq_premium_quarterly', 'logiq_premium_annual',
-                'logiq_pro_monthly', 'logiq_pro_quarterly', 'logiq_pro_annual',
-                'premium_monthly', 'premium_quarterly', 'premium_annual',
-                'logiq-premium-monthly', 'logiq-premium-quarterly', 'logiq-premium-annual',
-                'logiq_monthly_v2', 'logiq_quarterly_v2', 'logiq_annual_v2'
-              ];
-              const allSkusToTry = [...new Set(variations)];
+              const allSkusToTry = Object.values(PRODUCT_IDS);
 
               setChivatoLog(`[INIT] Version: ${APP_VERSION_TAG}\nSearching ${allSkusToTry.length} SKUs...`);
               console.log(`Searching ${allSkusToTry.length} SKUs: ${allSkusToTry.join(', ')}`);
 
               let foundSubs: any[] = [];
               try {
-                // Try modern Subscriptions first
+                // Try modern Subscriptions only
                 const subs = await IAP.getSubscriptions({ skus: allSkusToTry });
                 if (subs.length > 0) {
                   const subNames = subs.map(s => `${(s as any).productId} (Sub)`).join(', ');
@@ -104,28 +91,11 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 console.log("getSubscriptions error (expected if empty):", e.message);
               }
 
-              // Fallback to Products
-              try {
-                const prods = await IAP.getProducts({ skus: allSkusToTry });
-                if (prods.length > 0) {
-                  const prodNames = prods.map(p => `${(p as any).productId} (Prod)`).join(', ');
-                  foundSubs = [...foundSubs, ...prods];
-                  setChivatoLog(prev => `${prev}\n[FOUND PRODS] ${prodNames}`);
-                }
-              } catch (e: any) {
-                console.log("getProducts error:", e.message);
-              }
-
               if (foundSubs.length === 0) {
                 const rawDebugInfo = `SKUs sought: ${allSkusToTry.join(', ')}\n\nPossible cause: Account not authorized as tester or SKUs inactive/different in Play Console.`;
                 setChivatoLog(`[STORE ALERT]\nNo se encontró nada en la tienda.\n\n${rawDebugInfo}`);
               } else {
                 console.log(`Found ${foundSubs.length} items: ${foundSubs.map(s => (s as any).productId).join(', ')}`);
-                // If we found legacy SKUs, we log it for the user to see
-                const foundIds = foundSubs.map(s => (s as any).productId);
-                if (foundIds.some(id => !primarySkus.includes(id))) {
-                  setChivatoLog(`[SKU DISCOVERY]\nEncontrados SKUs no-v2:\n${foundIds.join('\n')}`);
-                }
               }
 
               setSubscriptions(foundSubs);
@@ -334,14 +304,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 {loading ? (
                   <ActivityIndicator size="small" color="#3498DB" />
                 ) : (() => {
-                  const findSub = (key: 'monthly' | 'quarterly' | 'annual') => {
-                    return subscriptions.find(s => {
-                      const pid = s.productId.toLowerCase();
-                      return pid.includes(key) && (pid.includes('logiq') || pid.includes('premium'));
-                    });
-                  };
-
-                  const sub = findSub('annual');
+                  const sub = subscriptions.find(s => s.productId === PRODUCT_IDS.ANNUAL);
                   if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
 
                   // Robust price extraction
@@ -373,14 +336,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 {loading ? (
                   <ActivityIndicator size="small" color="#3498DB" />
                 ) : (() => {
-                  const findSub = (key: 'monthly' | 'quarterly' | 'annual') => {
-                    return subscriptions.find(s => {
-                      const pid = s.productId.toLowerCase();
-                      return pid.includes(key) && (pid.includes('logiq') || pid.includes('premium'));
-                    });
-                  };
-
-                  const sub = findSub('quarterly');
+                  const sub = subscriptions.find(s => s.productId === PRODUCT_IDS.QUARTERLY);
                   if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
 
                   const subAny = sub as any;
@@ -407,14 +363,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 {loading ? (
                   <ActivityIndicator size="small" color="#3498DB" />
                 ) : (() => {
-                  const findSub = (key: 'monthly' | 'quarterly' | 'annual') => {
-                    return subscriptions.find(s => {
-                      const pid = s.productId.toLowerCase();
-                      return pid.includes(key) && (pid.includes('logiq') || pid.includes('premium'));
-                    });
-                  };
-
-                  const sub = findSub('monthly');
+                  const sub = subscriptions.find(s => s.productId === PRODUCT_IDS.MONTHLY);
                   if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
 
                   const subAny = sub as any;
