@@ -24,7 +24,7 @@ export interface Decision {
   inputs: FDUInput;
   result: FDUResult;
   notes?: string;
-  aiReport?: string;
+  ai_report?: string;
   context?: string;
 }
 

@@ -227,7 +227,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         date: new Date().toISOString(),
         inputs,
         result,
-        aiReport,
+        ai_report: aiReport,
         context: context || undefined,
       };
 

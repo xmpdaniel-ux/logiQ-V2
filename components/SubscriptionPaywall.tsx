@@ -333,23 +333,25 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               </View>
               <Text style={styles.planName}>{t('PAYWALL_ANNUAL')}</Text>
               <View style={styles.priceContainer}>
+                {loading ? (
+                  <ActivityIndicator size="small" color="#3498DB" />
                 ) : (() => {
                   const findSub = (key: 'monthly' | 'quarterly' | 'annual') => {
                     return subscriptions.find(s => {
                       const pid = s.productId.toLowerCase();
-                return pid.includes(key) && (pid.includes('logiq') || pid.includes('premium'));
+                      return pid.includes(key) && (pid.includes('logiq') || pid.includes('premium'));
                     });
                   };
 
-                const sub = findSub('annual');
-                if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
+                  const sub = findSub('annual');
+                  if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
 
-                // Robust price extraction
-                const subAny = sub as any;
-                const price = subAny.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice
-                || subAny.localizedPrice
-                || subAny.price;
-                return <Text style={styles.planPrice}>{price || 'N/A'}</Text>;
+                  // Robust price extraction
+                  const subAny = sub as any;
+                  const price = subAny.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice
+                    || subAny.localizedPrice
+                    || subAny.price;
+                  return <Text style={styles.planPrice}>{price || 'N/A'}</Text>;
                 })()}
               </View>
               <Text style={styles.planPeriod}>{t('PER_YEAR')}</Text>

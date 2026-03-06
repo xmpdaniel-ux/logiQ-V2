@@ -162,6 +162,7 @@
   "AI_LOADING_4": "Analyzing perspectives...",
   "REPORT_COPIED": "Report copied to clipboard",
   "COPIED_TITLE": "Copied",
+  "COPIED_MESSAGE": "Report copied to clipboard successfully.",
   "OK": "OK",
   "ERROR": "ERROR",
   "LOADING": "Loading...",
