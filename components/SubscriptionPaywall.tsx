@@ -15,7 +15,7 @@ const PLAN_IDS = {
   ANNUAL: 'logiq-annual-v2'
 };
 
-const APP_VERSION_TAG = '2.0.3.0 (Build 134)';
+const APP_VERSION_TAG = '2.0.3.1 (Build 135)';
 
 interface SubscriptionPaywallProps {
   visible: boolean;
