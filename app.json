@@ -16,7 +16,7 @@
     "newArchEnabled": false,
     "android": {
       "package": "com.logiq.app.pro",
-      "versionCode": 136,
+      "versionCode": 137,
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -25,7 +25,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.logiq.app.pro",
-      "buildNumber": "136"
+      "buildNumber": "137"
     },
     "plugins": [
       "expo-router",
@@ -45,7 +45,12 @@
       "expo-font",
       "expo-localization",
       "expo-dev-client",
-      "react-native-iap"
+      [
+        "react-native-iap",
+        {
+          "paymentProvider": "play"
+        }
+      ]
     ],
     "extra": {
       "eas": {

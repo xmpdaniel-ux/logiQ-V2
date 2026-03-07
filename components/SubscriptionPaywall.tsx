@@ -15,7 +15,7 @@ const PLAN_IDS = {
   ANNUAL: 'logiq-annual-v2'
 };
 
-const APP_VERSION_TAG = '2.0.3.2 (Build 136)';
+const APP_VERSION_TAG = '2.0.3.3 (Build 137)';
 
 interface SubscriptionPaywallProps {
   visible: boolean;
@@ -38,7 +38,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   const [loading, setLoading] = useState(false);
   const [purchaseState, setPurchaseState] = useState<'idle' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [chivatoLog, setChivatoLog] = useState<string | null>(null);
+  const [chivatoLog, setChivatoLog] = useState<string>('');
   const [subscriptions, setSubscriptions] = useState<any[]>([]); // To store available subscription offers
 
   const LEGAL_URL = "https://docs.google.com/document/d/1_aW0aGiIHbtmh9gputLKX9iNDcz3xNHC7lHT7InMCg4/edit?usp=sharing";
@@ -170,7 +170,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       const subAny = matchingSub as any;
       const realProductId = subAny.productId;
 
-      setChivatoLog(prev => `${prev}\n[PURCHASE INIT] Plan: ${planId}\nProduct: ${realProductId}`);
+      setChivatoLog(prev => `${prev}\n[PURCHASE INIT] Plan: ${planId}\nProduct: ${realProductId}\nToken: ${offerToken ? offerToken.substring(0, 15) + '...' : 'NULL'}`);
 
       if (subAny.subscriptionOfferDetails && subAny.subscriptionOfferDetails.length > 0) {
         // Buscar la oferta que coincida con el plan base
