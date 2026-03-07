@@ -30,7 +30,7 @@ interface PremiumContextType {
   refreshUserStatus: () => Promise<void>;
   handlePurchaseSuccess: () => void;
   getDeviceId: () => string;
-  requestPurchase: (sku: string, offerToken?: string) => Promise<void>;
+  requestPurchase: (sku: string, params: { offerToken?: string, basePlanId?: string }) => Promise<void>;
 }
 
 const PremiumContext = createContext<PremiumContextType | undefined>(undefined);
@@ -186,13 +186,13 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
-  const requestPurchase = async (sku: string, offerToken?: string) => {
+  const requestPurchase = async (sku: string, params: { offerToken?: string, basePlanId?: string } = {}) => {
     try {
-      if (Platform.OS === 'android' && offerToken) {
+      if (Platform.OS === 'android' && params.offerToken) {
         // En Android para la versión 5/6+ es crítico enviar el offerToken
         await IAP.requestSubscription({
           sku,
-          subscriptionOffers: [{ sku, offerToken }]
+          subscriptionOffers: [{ sku, offerToken: params.offerToken }]
         });
       } else {
         await IAP.requestSubscription({ sku });

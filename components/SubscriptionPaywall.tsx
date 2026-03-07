@@ -203,10 +203,14 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
         throw new Error(`No offerToken for ${realProductId} - plan: ${planId}`);
       }
 
-      await requestPurchase(realProductId, offerToken);
+      await requestPurchase(realProductId, { offerToken, basePlanId: planId });
     } catch (error: any) {
       console.error('Purchase error:', error);
-      if (error?.code !== 'E_USER_CANCELLED') {
+      const nativeCode = error?.code || 'NO_CODE';
+      const nativeMsg = error?.message || 'Unknown Error';
+
+      if (nativeCode !== 'E_USER_CANCELLED') {
+        setChivatoLog(`[PURCHASE ERROR]\nCode: ${nativeCode}\nMsg: ${nativeMsg}\nPlan: ${planId}`);
         setPurchaseState('error');
       }
     } finally {
