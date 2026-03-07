@@ -3,7 +3,7 @@
     "name": "LogiQ",
     "slug": "logiq",
     "owner": "mrdeath2",
-    "version": "2.0.3.1",
+    "version": "2.0.3.2",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "splash": {
@@ -16,7 +16,7 @@
     "newArchEnabled": false,
     "android": {
       "package": "com.logiq.app.pro",
-      "versionCode": 135,
+      "versionCode": 136,
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -25,7 +25,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.logiq.app.pro",
-      "buildNumber": "135"
+      "buildNumber": "136"
     },
     "plugins": [
       "expo-router",
@@ -44,7 +44,8 @@
       ],
       "expo-font",
       "expo-localization",
-      "expo-dev-client"
+      "expo-dev-client",
+      "react-native-iap"
     ],
     "extra": {
       "eas": {

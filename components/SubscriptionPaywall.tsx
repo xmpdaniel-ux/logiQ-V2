@@ -15,7 +15,7 @@ const PLAN_IDS = {
   ANNUAL: 'logiq-annual-v2'
 };
 
-const APP_VERSION_TAG = '2.0.3.1 (Build 135)';
+const APP_VERSION_TAG = '2.0.3.2 (Build 136)';
 
 interface SubscriptionPaywallProps {
   visible: boolean;
@@ -138,11 +138,11 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
         offer = subAny.subscriptionOfferDetails[0];
       }
 
-      if (offer && offer.pricingPhases && offer.pricingPhases.pricingPhaseList) {
+      if (offer && offer.pricingPhases && offer.pricingPhases.pricingPhaseList && offer.pricingPhases.pricingPhaseList.length > 0) {
         // El precio real suele ser la última fase (después del trial)
         const phases = offer.pricingPhases.pricingPhaseList;
         const regularPhase = phases[phases.length - 1];
-        return regularPhase.formattedPrice;
+        return regularPhase.formattedPrice || 'N/A';
       }
     }
 
@@ -169,6 +169,8 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
 
       const subAny = matchingSub as any;
       const realProductId = subAny.productId;
+
+      setChivatoLog(prev => `${prev}\n[PURCHASE INIT] Plan: ${planId}\nProduct: ${realProductId}`);
 
       if (subAny.subscriptionOfferDetails && subAny.subscriptionOfferDetails.length > 0) {
         // Buscar la oferta que coincida con el plan base
