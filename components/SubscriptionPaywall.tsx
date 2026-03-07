@@ -8,13 +8,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePremium } from '../contexts/PremiumContext';
 import { useTranslation } from 'react-i18next';
 import * as IAP from 'react-native-iap'; // Direct IAP import for types and methods
-const PRODUCT_IDS = {
+const PRODUCT_ID = 'logiq_premium_monthly';
+const PLAN_IDS = {
   MONTHLY: 'logiq-monthly-v2',
   QUARTERLY: 'logiq-quarterly-v2',
   ANNUAL: 'logiq-annual-v2'
 };
 
-const APP_VERSION_TAG = '2.0.2.9 (Build 133)';
+const APP_VERSION_TAG = '2.0.2.9 (Build 134)';
 
 interface SubscriptionPaywallProps {
   visible: boolean;
@@ -73,10 +74,10 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               await IAP.initConnection();
               setStatusMessage(t('msg_loading_plans') || 'Cargando planes...');
 
-              const allSkusToTry = Object.values(PRODUCT_IDS);
+              const allSkusToTry = [PRODUCT_ID];
 
-              setChivatoLog(`[INIT] Version: ${APP_VERSION_TAG}\nSearching ${allSkusToTry.length} SKUs...`);
-              console.log(`Searching ${allSkusToTry.length} SKUs: ${allSkusToTry.join(', ')}`);
+              setChivatoLog(`[INIT] Version: ${APP_VERSION_TAG}\nSearching Product ID: ${PRODUCT_ID}...`);
+              console.log(`Searching Product ID: ${PRODUCT_ID}`);
 
               let foundSubs: any[] = [];
               try {
@@ -124,50 +125,82 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
     }
   }, [visible]);
 
+  const getPriceForPlan = (planId: string) => {
+    const subAny = subscriptions.find(s => s.productId === PRODUCT_ID) as any;
+    if (!subAny) return 'N/A';
+
+    // Android Billing V5+ (subscriptionOfferDetails)
+    if (subAny.subscriptionOfferDetails) {
+      let offer = subAny.subscriptionOfferDetails.find((o: any) => o.basePlanId === planId);
+
+      if (!offer) {
+        // Fallback a primera oferta
+        offer = subAny.subscriptionOfferDetails[0];
+      }
+
+      if (offer && offer.pricingPhases && offer.pricingPhases.pricingPhaseList) {
+        // El precio real suele ser la última fase (después del trial)
+        const phases = offer.pricingPhases.pricingPhaseList;
+        const regularPhase = phases[phases.length - 1];
+        return regularPhase.formattedPrice;
+      }
+    }
+
+    // iOS / Fallback
+    return subAny.localizedPrice || subAny.price || 'N/A';
+  };
+
   /**
    * Handle Purchase - Ready for Google Play Billing
    * In production, this will integrate with react-native-purchases or expo-iap
    */
-  const handlePurchase = async (productId: string) => {
+  const handlePurchase = async (planId: string) => {
     setLoading(true);
 
     try {
-      console.log(`Requesting purchase for: ${productId}`);
-      let offerToken = undefined; // Declare offerToken here
+      console.log(`Requesting purchase for plan: ${planId}`);
+      let offerToken = undefined;
 
-      // Logic to find the discovered SKU that matches the plan type
-      let matchingSub = subscriptions.find(s => s.productId === productId);
-
-      if (!matchingSub) {
-        console.log(`Direct match failed for ${productId}, searching fuzzy...`);
-        const baseName = productId.split('-')[1]; // e.g. 'monthly' from 'logiq-monthly-v2'
-        matchingSub = subscriptions.find(s => s.productId.includes(baseName));
-      }
+      const matchingSub = subscriptions.find(s => s.productId === PRODUCT_ID);
 
       if (!matchingSub) {
-        throw new Error(`No se encontró ningún producto en la tienda para el plan: ${productId}`);
+        throw new Error(`No se encontró el producto principal en la tienda: ${PRODUCT_ID}`);
       }
 
       const subAny = matchingSub as any;
       const realProductId = subAny.productId;
-      console.log(`Using discovered SKU: ${realProductId}`);
 
       if (subAny.subscriptionOfferDetails && subAny.subscriptionOfferDetails.length > 0) {
-        // Intentar encontrar oferta con trial (solo para el plan anual idealmente)
-        let offer = null;
-        if (realProductId.includes('annual')) {
+        // Buscar la oferta que coincida con el plan base
+        let offer = subAny.subscriptionOfferDetails.find((o: any) => o.basePlanId === planId);
+
+        // Si no encuentra por basePlanId exacto, intentar encontrar por similitud
+        if (!offer) {
           offer = subAny.subscriptionOfferDetails.find((o: any) =>
-            o.pricingPhases.pricingPhaseList.some((p: any) => p.priceAmountMicros === '0')
+            o.offerId?.includes(planId.split('-')[1]) ||
+            o.basePlanId?.includes(planId.split('-')[1])
           );
         }
 
-        // Si no hay trial o es otro plan, coger la primera oferta válida
-        offer = offer || subAny.subscriptionOfferDetails[0];
+        // Si tiene trial (para anual), intentar preferir la oferta con trial
+        if (planId === PLAN_IDS.ANNUAL) {
+          const trialOffer = subAny.subscriptionOfferDetails.find((o: any) =>
+            o.basePlanId === planId &&
+            o.pricingPhases.pricingPhaseList.some((p: any) => p.priceAmountMicros === '0')
+          );
+          if (trialOffer) offer = trialOffer;
+        }
+
+        if (!offer) {
+          console.log(`Warning: no exact match for plan ${planId}, using first available.`);
+          offer = subAny.subscriptionOfferDetails[0];
+        }
+
         offerToken = offer?.offerToken;
       }
 
-      if (!offerToken) {
-        throw new Error(`No offerToken for ${realProductId}. Details: ${JSON.stringify(subAny).substring(0, 100)}`);
+      if (!offerToken && Platform.OS === 'android') {
+        throw new Error(`No offerToken for ${realProductId} - plan: ${planId}`);
       }
 
       await requestPurchase(realProductId, offerToken);
@@ -187,11 +220,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       console.log('Restoring purchases...');
       const availablePurchases = await IAP.getAvailablePurchases();
 
-      const hasActivePurchase = availablePurchases.some(p =>
-        p.productId === PRODUCT_IDS.MONTHLY ||
-        p.productId === PRODUCT_IDS.QUARTERLY ||
-        p.productId === PRODUCT_IDS.ANNUAL
-      );
+      const hasActivePurchase = availablePurchases.some(p => p.productId === PRODUCT_ID);
 
       if (hasActivePurchase) {
         Alert.alert(
@@ -304,15 +333,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 {loading ? (
                   <ActivityIndicator size="small" color="#3498DB" />
                 ) : (() => {
-                  const sub = subscriptions.find(s => s.productId === PRODUCT_IDS.ANNUAL);
-                  if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
-
-                  // Robust price extraction
-                  const subAny = sub as any;
-                  const price = subAny.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice
-                    || subAny.localizedPrice
-                    || subAny.price;
-                  return <Text style={styles.planPrice}>{price || 'N/A'}</Text>;
+                  return <Text style={styles.planPrice}>{getPriceForPlan(PLAN_IDS.ANNUAL)}</Text>;
                 })()}
               </View>
               <Text style={styles.planPeriod}>{t('PER_YEAR')}</Text>
@@ -336,14 +357,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 {loading ? (
                   <ActivityIndicator size="small" color="#3498DB" />
                 ) : (() => {
-                  const sub = subscriptions.find(s => s.productId === PRODUCT_IDS.QUARTERLY);
-                  if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
-
-                  const subAny = sub as any;
-                  const price = subAny.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice
-                    || subAny.localizedPrice
-                    || subAny.price;
-                  return <Text style={styles.planPrice}>{price || 'N/A'}</Text>;
+                  return <Text style={styles.planPrice}>{getPriceForPlan(PLAN_IDS.QUARTERLY)}</Text>;
                 })()}
               </View>
               <Text style={styles.planPeriod}>{t('PER_QUARTER')}</Text>
@@ -363,14 +377,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 {loading ? (
                   <ActivityIndicator size="small" color="#3498DB" />
                 ) : (() => {
-                  const sub = subscriptions.find(s => s.productId === PRODUCT_IDS.MONTHLY);
-                  if (!sub) return <Text style={styles.planPrice}>N/A</Text>;
-
-                  const subAny = sub as any;
-                  const price = subAny.subscriptionOfferDetails?.[0]?.pricingPhases.pricingPhaseList[0].formattedPrice
-                    || subAny.localizedPrice
-                    || subAny.price;
-                  return <Text style={styles.planPrice}>{price || 'N/A'}</Text>;
+                  return <Text style={styles.planPrice}>{getPriceForPlan(PLAN_IDS.MONTHLY)}</Text>;
                 })()}
               </View>
               <Text style={styles.planPeriod}>{t('PER_MONTH')}</Text>
@@ -413,9 +420,9 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
           <TouchableOpacity
             style={styles.purchaseButton}
             onPress={() => handlePurchase(
-              selectedPlan === 'annual' ? PRODUCT_IDS.ANNUAL :
-                selectedPlan === 'quarterly' ? PRODUCT_IDS.QUARTERLY :
-                  PRODUCT_IDS.MONTHLY
+              selectedPlan === 'annual' ? PLAN_IDS.ANNUAL :
+                selectedPlan === 'quarterly' ? PLAN_IDS.QUARTERLY :
+                  PLAN_IDS.MONTHLY
             )}
             disabled={loading}
           >

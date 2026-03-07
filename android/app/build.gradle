@@ -92,7 +92,7 @@ android {
         applicationId 'com.logiq.app.pro'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion 35
-        versionCode 133
+        versionCode 134
         versionName "2.0.2.9"
         missingDimensionStrategy 'store', 'play'
         ndk {
