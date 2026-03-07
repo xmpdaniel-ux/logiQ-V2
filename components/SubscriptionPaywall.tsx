@@ -15,7 +15,7 @@ const PLAN_IDS = {
   ANNUAL: 'logiq-annual-v2'
 };
 
-const APP_VERSION_TAG = '2.0.3.3 (Build 137)';
+const APP_VERSION_TAG = '2.0.3.4 (Build 138)';
 
 interface SubscriptionPaywallProps {
   visible: boolean;
@@ -32,14 +32,13 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   trigger = 'manual',
   language = 'es'
 }) => {
-  const { t } = useTranslation(); // Replaced translations object with useTranslation hook
-  const { requestPurchase } = usePremium();
+  const { t } = useTranslation();
+  const { requestPurchase, isPremium } = usePremium();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'quarterly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
   const [purchaseState, setPurchaseState] = useState<'idle' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [chivatoLog, setChivatoLog] = useState<string>('');
-  const [subscriptions, setSubscriptions] = useState<any[]>([]); // To store available subscription offers
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
 
   const LEGAL_URL = "https://docs.google.com/document/d/1_aW0aGiIHbtmh9gputLKX9iNDcz3xNHC7lHT7InMCg4/edit?usp=sharing";
 
@@ -76,27 +75,20 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
 
               const allSkusToTry = [PRODUCT_ID];
 
-              setChivatoLog(`[INIT] Version: ${APP_VERSION_TAG}\nSearching Product ID: ${PRODUCT_ID}...`);
-              console.log(`Searching Product ID: ${PRODUCT_ID}`);
-
               let foundSubs: any[] = [];
               try {
-                // Try modern Subscriptions only
                 const subs = await IAP.getSubscriptions({ skus: allSkusToTry });
                 if (subs.length > 0) {
-                  const subNames = subs.map(s => `${(s as any).productId} (Sub)`).join(', ');
                   foundSubs = [...foundSubs, ...subs];
-                  setChivatoLog(prev => `${prev}\n[FOUND SUBS] ${subNames}`);
                 }
               } catch (e: any) {
-                console.log("getSubscriptions error (expected if empty):", e.message);
+                console.log("getSubscriptions error:", e.message);
               }
 
               if (foundSubs.length === 0) {
-                const rawDebugInfo = `SKUs sought: ${allSkusToTry.join(', ')}\n\nPossible cause: Account not authorized as tester or SKUs inactive/different in Play Console.`;
-                setChivatoLog(`[STORE ALERT]\nNo se encontró nada en la tienda.\n\n${rawDebugInfo}`);
+                setStatusMessage('No se encontraron productos en la tienda.');
               } else {
-                console.log(`Found ${foundSubs.length} items: ${foundSubs.map(s => (s as any).productId).join(', ')}`);
+                console.log(`Found ${foundSubs.length} items`);
               }
 
               setSubscriptions(foundSubs);
@@ -284,6 +276,44 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
     );
   }
 
+  // Already Subscribed State
+  if (isPremium) {
+    const manageSubsUrl = `https://play.google.com/store/account/subscriptions?sku=${PRODUCT_ID}&package=com.logiq.app.pro`;
+    return (
+      <Modal visible={visible} animationType="slide" transparent>
+        <View style={styles.overlay}>
+          <View style={[styles.container, { paddingBottom: insets.bottom + 20 }]}>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <Ionicons name="close" size={28} color="#7F8C8D" />
+            </TouchableOpacity>
+
+            <View style={{ alignItems: 'center', paddingHorizontal: 24, paddingTop: 24 }}>
+              <View style={[styles.iconContainer, { backgroundColor: '#E8F8F5' }]}>
+                <MaterialCommunityIcons name="crown" size={48} color="#F1C40F" />
+              </View>
+              <Text style={[styles.title, { marginTop: 12 }]}>{t('PAYWALL_ALREADY_PRO') || '¡Eres Premium! 🎉'}</Text>
+              <Text style={[styles.subtitle, { marginTop: 8, marginBottom: 24 }]}>
+                {t('PAYWALL_ALREADY_PRO_DESC') || 'Tu suscripción a LogiQ está activa. Puedes gestionar o cambiar de plan en Google Play.'}
+              </Text>
+
+              <TouchableOpacity
+                style={[styles.purchaseButton, { backgroundColor: '#2ECC71' }]}
+                onPress={() => Linking.openURL(manageSubsUrl)}
+              >
+                <Ionicons name="settings-outline" size={20} color="#FFF" />
+                <Text style={[styles.purchaseButtonText, { marginLeft: 8 }]}>{t('MANAGE_SUBSCRIPTION') || 'Gestionar suscripción'}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={onClose} style={[styles.laterButton, { marginTop: 16 }]}>
+                <Text style={styles.laterText}>{t('PAYWALL_CLOSE') || 'Cerrar'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
+
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
@@ -399,22 +429,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
             </View>
           )}
 
-          {chivatoLog && (
-            <View style={styles.chivatoOverlay}>
-              <Ionicons name="bug" size={40} color="#FFFFFF" />
-              <Text style={styles.chivatoTitle}>DEBUG LOG (AND-IAP)</Text>
-              <Text style={styles.chivatoText}>{chivatoLog}</Text>
-              <Text style={styles.chivatoVersion}>Build v{APP_VERSION_TAG}</Text>
-              <TouchableOpacity
-                style={styles.chivatoClose}
-                onPress={() => setChivatoLog(null)}
-              >
-                <Text style={styles.chivatoCloseText}>CERRAR LOG</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {!loading && statusMessage && !chivatoLog && (
+          {!loading && statusMessage && (
             <View style={styles.errorBanner}>
               <Text style={styles.statusText}>{statusMessage}</Text>
               <TouchableOpacity onPress={() => setStatusMessage(null)}>
