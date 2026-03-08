@@ -236,6 +236,8 @@
   "PAYWALL_SUCCESS_MESSAGE": "Vous avez désormais un accès illimité à toutes les fonctionnalités.",
   "PAYWALL_ERROR_MESSAGE": "Veuillez réessayer ou contacter l'assistance.",
   "PAYWALL_TRY_AGAIN": "Réessayer",
-  "PAYWALL_COMING_SOON_TITLE": "Prochainement",
-  "PAYWALL_COMING_SOON_MESSAGE": "Cette fonctionnalité sera disponible lors de la publication de l'application"
+  "PAYWALL_COMING_SOON_MESSAGE": "Cette fonctionnalité sera disponible lors de la publication de l'application",
+  "PAYWALL_ALREADY_PRO": "Abonnement Actif",
+  "PAYWALL_ALREADY_PRO_DESC": "Votre abonnement LogiQ est actif. Vous pouvez gérer ou modifier votre plan sur Google Play.",
+  "MANAGE_SUBSCRIPTION": "Gérer l'abonnement"
 }

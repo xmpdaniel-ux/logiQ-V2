@@ -237,6 +237,8 @@
   "PAYWALL_ERROR_TITLE": "Falha na compra",
   "PAYWALL_ERROR_MESSAGE": "Por favor, tente novamente ou entre em contato com o suporte.",
   "PAYWALL_TRY_AGAIN": "Tentar novamente",
-  "PAYWALL_COMING_SOON_TITLE": "Em breve",
-  "PAYWALL_COMING_SOON_MESSAGE": "Esta funcionalidade estará disponível quando o aplicativo for publicado"
+  "PAYWALL_COMING_SOON_MESSAGE": "Esta funcionalidade estará disponível quando o aplicativo for publicado",
+  "PAYWALL_ALREADY_PRO": "Assinatura Ativa",
+  "PAYWALL_ALREADY_PRO_DESC": "Sua assinatura LogiQ está ativa. Você pode gerenciar ou alterar seu plano no Google Play.",
+  "MANAGE_SUBSCRIPTION": "Gerenciar assinatura"
 }

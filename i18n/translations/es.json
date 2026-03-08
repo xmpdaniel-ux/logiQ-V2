@@ -264,5 +264,7 @@
   "PAYWALL_TRY_AGAIN": "Intentar de Nuevo",
   "PAYWALL_COMING_SOON_TITLE": "Próximamente",
   "PAYWALL_COMING_SOON_MESSAGE": "Esta función estará disponible cuando la app se publique",
-  "PAYWALL_ALREADY_PRO": "Suscripción Activa"
+  "PAYWALL_ALREADY_PRO": "Suscripción Activa",
+  "PAYWALL_ALREADY_PRO_DESC": "Tu suscripción a LogiQ está activa. Puedes gestionar o cambiar de plan en Google Play.",
+  "MANAGE_SUBSCRIPTION": "Gestionar suscripción"
 }
