@@ -15,7 +15,7 @@ const PLAN_IDS = {
   ANNUAL: 'logiq-annual-v2'
 };
 
-const APP_VERSION_TAG = '2.0.3.5 (Build 139)';
+const APP_VERSION_TAG = '2.0.3.6 (Build 140)';
 
 interface SubscriptionPaywallProps {
   visible: boolean;
@@ -102,11 +102,16 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
           const nativeCode = err.code || 'NO_CODE';
           const nativeMsg = err.message || 'Unknown Error';
 
-          const errMsg = err.message === 'Store connection timed out'
-            ? 'Store connection timed out. Please check your internet or try again.'
-            : `Error de tienda (${nativeCode}): ${nativeMsg}`;
-
-          setStatusMessage(errMsg);
+          // Only show error message if the user manually opened the paywall
+          // Otherwise, it might be a silent background check that timed out
+          if (trigger === 'manual') {
+            const errMsg = err.message === 'Store connection timed out'
+              ? 'Store connection timed out. Please check your internet or try again.'
+              : `Error de tienda (${nativeCode}): ${nativeMsg}`;
+            setStatusMessage(errMsg);
+          } else {
+            setStatusMessage(null);
+          }
           setLoading(false);
         }
       };
