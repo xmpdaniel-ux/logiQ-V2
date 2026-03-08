@@ -263,5 +263,6 @@
   "PAYWALL_ERROR_MESSAGE": "Por favor intenta de nuevo o contacta soporte.",
   "PAYWALL_TRY_AGAIN": "Intentar de Nuevo",
   "PAYWALL_COMING_SOON_TITLE": "Próximamente",
-  "PAYWALL_COMING_SOON_MESSAGE": "Esta función estará disponible cuando la app se publique"
+  "PAYWALL_COMING_SOON_MESSAGE": "Esta función estará disponible cuando la app se publique",
+  "PAYWALL_ALREADY_PRO": "Suscripción Activa"
 }

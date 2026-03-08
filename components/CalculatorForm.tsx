@@ -402,10 +402,13 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
       </View>
 
       {isPremium && (
-        <View style={styles.proActiveBanner}>
+        <TouchableOpacity
+          style={styles.proActiveBanner}
+          onPress={() => setShowPaywall(true, 'manual')}
+        >
           <MaterialCommunityIcons name="crown" size={20} color="#F1C40F" />
           <Text style={styles.proActiveBannerText}>{t('PAYWALL_ALREADY_PRO') || 'LogiQ Pro Active'}</Text>
-        </View>
+        </TouchableOpacity>
       )}
 
       {!isPremium && (
