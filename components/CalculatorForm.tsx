@@ -390,9 +390,23 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
       contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
     >
       <View style={styles.headerContainer}>
-        <Text style={styles.brandTitle}>LogiQ</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.brandTitle}>LogiQ</Text>
+          {isPremium && (
+            <View style={styles.proBadge}>
+              <Text style={styles.proBadgeText}>PRO</Text>
+            </View>
+          )}
+        </View>
         <Text style={styles.headerTitle}>{t(titleKey)}</Text>
       </View>
+
+      {isPremium && (
+        <View style={styles.proActiveBanner}>
+          <MaterialCommunityIcons name="crown" size={20} color="#F1C40F" />
+          <Text style={styles.proActiveBannerText}>{t('PAYWALL_ALREADY_PRO') || 'LogiQ Pro Active'}</Text>
+        </View>
+      )}
 
       {!isPremium && (
         <TouchableOpacity
@@ -829,6 +843,36 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#2C3E50',
     lineHeight: 18,
+  },
+  proBadge: {
+    backgroundColor: '#F1C40F',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  proBadgeText: {
+    color: '#2C3E50',
+    fontSize: 10,
+    fontWeight: '900',
+  },
+  proActiveBanner: {
+    backgroundColor: '#2C3E50',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 12,
+    marginBottom: 20,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(241, 196, 15, 0.3)',
+  },
+  proActiveBannerText: {
+    color: '#F1C40F',
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });
 

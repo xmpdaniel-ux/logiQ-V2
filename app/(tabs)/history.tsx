@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
+import { usePremium } from '../../contexts/PremiumContext';
 
 const { width } = Dimensions.get('window');
 const HISTORY_KEY = '@fdu_history';
@@ -87,6 +88,7 @@ const deduplicate = (history: Decision[]): Decision[] => {
 export default function HistoryScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { isPremium } = usePremium();
   const [history, setHistory] = useState<Decision[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -416,6 +418,11 @@ export default function HistoryScreen() {
       <View style={styles.header}>
         <View style={styles.headerTitleRow}>
           <Text style={styles.headerTitle}>{t('P_TITULO_HIS') || 'Historial'}</Text>
+          {isPremium && (
+            <View style={styles.proBadge}>
+              <Text style={styles.proBadgeText}>PRO</Text>
+            </View>
+          )}
         </View>
         <TouchableOpacity
           style={[styles.clearAllBtn, isDeleting && { opacity: 0.5 }]}
@@ -807,7 +814,19 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: '700',
+  },
+  proBadge: {
+    backgroundColor: '#F1C40F',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  proBadgeText: {
+    color: '#2C3E50',
+    fontSize: 10,
+    fontWeight: '900',
   },
 
   contextSection: {

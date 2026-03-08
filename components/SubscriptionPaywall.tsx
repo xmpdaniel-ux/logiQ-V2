@@ -15,7 +15,7 @@ const PLAN_IDS = {
   ANNUAL: 'logiq-annual-v2'
 };
 
-const APP_VERSION_TAG = '2.0.3.4 (Build 138)';
+const APP_VERSION_TAG = '2.0.3.5 (Build 139)';
 
 interface SubscriptionPaywallProps {
   visible: boolean;
@@ -102,7 +102,6 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
           const nativeCode = err.code || 'NO_CODE';
           const nativeMsg = err.message || 'Unknown Error';
 
-          setChivatoLog(`[STORE ERROR]\nCode: ${nativeCode}\nMsg: ${nativeMsg}`);
 
           const errMsg = err.message === 'Store connection timed out'
             ? 'Store connection timed out. Please check your internet or try again.'
@@ -162,8 +161,6 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       const subAny = matchingSub as any;
       const realProductId = subAny.productId;
 
-      setChivatoLog(prev => `${prev}\n[PURCHASE INIT] Plan: ${planId}\nProduct: ${realProductId}\nToken: ${offerToken ? offerToken.substring(0, 15) + '...' : 'NULL'}`);
-
       if (subAny.subscriptionOfferDetails && subAny.subscriptionOfferDetails.length > 0) {
         // Buscar la oferta que coincida con el plan base
         let offer = subAny.subscriptionOfferDetails.find((o: any) => o.basePlanId === planId);
@@ -204,7 +201,6 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
       const nativeMsg = error?.message || 'Unknown Error';
 
       if (nativeCode !== 'E_USER_CANCELLED') {
-        setChivatoLog(`[PURCHASE ERROR]\nCode: ${nativeCode}\nMsg: ${nativeMsg}\nPlan: ${planId}`);
         setPurchaseState('error');
       }
     } finally {
