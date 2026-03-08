@@ -102,7 +102,6 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
           const nativeCode = err.code || 'NO_CODE';
           const nativeMsg = err.message || 'Unknown Error';
 
-
           const errMsg = err.message === 'Store connection timed out'
             ? 'Store connection timed out. Please check your internet or try again.'
             : `Error de tienda (${nativeCode}): ${nativeMsg}`;
@@ -150,7 +149,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
 
     try {
       console.log(`Requesting purchase for plan: ${planId}`);
-      let offerToken = undefined;
+      let offerToken: string | undefined = undefined;
 
       const matchingSub = subscriptions.find(s => s.productId === PRODUCT_ID);
 
@@ -177,7 +176,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
         if (planId === PLAN_IDS.ANNUAL) {
           const trialOffer = subAny.subscriptionOfferDetails.find((o: any) =>
             o.basePlanId === planId &&
-            o.pricingPhases.pricingPhaseList.some((p: any) => p.priceAmountMicros === '0')
+            o.pricingPhases.pricingPhaseList.some((p: { priceAmountMicros: string }) => p.priceAmountMicros === '0')
           );
           if (trialOffer) offer = trialOffer;
         }
