@@ -164,18 +164,37 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
     try {
       const purchases = await IAP.getAvailablePurchases();
       // We check for any of our known substrings in the productIds
-      const hasActivePurchase = purchases.some(p =>
+      const activePurchase = purchases.find(p =>
         p.productId.includes('monthly') ||
         p.productId.includes('quarterly') ||
         p.productId.includes('annual') ||
         p.productId === 'logiq_premium_monthly'
       );
 
-      if (hasActivePurchase) {
+      if (activePurchase) {
         setIsPremium(true);
         setChatCredits(999);
         setReportCredits(999);
         await AsyncStorage.setItem(PREMIUM_KEY, 'true');
+
+        // Sync local premium status with Backend continuously to prevent 402 errors
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
+          const currentId = await getOrCreateDeviceId();
+          fetch(`${BACKEND_URL}/api/verify-purchase`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              device_id: currentId,
+              purchase_token: activePurchase.purchaseToken,
+              product_id: activePurchase.productId,
+              hardware_fingerprint: null
+            })
+          }).catch(e => console.warn('Silent sync failed', e));
+          clearTimeout(timeoutId);
+        } catch (e) { }
       } else {
         // Only downgrade if we are sure there are no purchases
         // But check if we have it in storage first as a safety net
@@ -185,7 +204,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
           await AsyncStorage.removeItem(PREMIUM_KEY);
         }
       }
-      return hasActivePurchase;
+      return !!activePurchase;
     } catch (err) {
       console.warn('Error validating Pro status:', err);
       return false;
@@ -229,6 +248,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
         });
 
         if (response.ok) {
+          const data = await response.json();
           if (data.is_premium) {
             setIsPremium(true);
             setReportCredits(999);
@@ -282,21 +302,21 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
     try {
       const response = await fetch(`${BACKEND_URL}/api/user/credits/${currentId}`);
 
-        if (response.ok) {
-          const data = await response.json();
-          setReportCredits(data.report_credits ?? 0);
-          setChatCredits(data.chat_credits ?? 0);
+      if (response.ok) {
+        const data = await response.json();
+        setReportCredits(data.report_credits ?? 0);
+        setChatCredits(data.chat_credits ?? 0);
 
-          // Only update isPremium to true if backend says so. 
-          // NEVER set to false from here if we already have it locally
-          if (data.is_premium) {
-            setIsPremium(true);
-            await AsyncStorage.setItem(PREMIUM_KEY, 'true');
-          }
-
-          await AsyncStorage.setItem(REPORT_CREDITS_KEY, String(data.report_credits ?? 0));
-          await AsyncStorage.setItem(CHAT_CREDITS_KEY, String(data.chat_credits ?? 0));
+        // Only update isPremium to true if backend says so. 
+        // NEVER set to false from here if we already have it locally
+        if (data.is_premium) {
+          setIsPremium(true);
+          await AsyncStorage.setItem(PREMIUM_KEY, 'true');
         }
+
+        await AsyncStorage.setItem(REPORT_CREDITS_KEY, String(data.report_credits ?? 0));
+        await AsyncStorage.setItem(CHAT_CREDITS_KEY, String(data.chat_credits ?? 0));
+      }
     } catch (error) {
       console.error('Error refreshing status:', error);
     }

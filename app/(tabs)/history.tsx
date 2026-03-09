@@ -296,8 +296,7 @@ export default function HistoryScreen() {
     return '#2ED573';
   };
 
-  // Move to a memoized component for performance
-  const HistoryItem = React.memo(({ item, index }: { item: Decision; index: number }) => {
+  const renderItem = useCallback(({ item, index }: { item: Decision; index: number }) => {
     const score = item.result?.score ?? 0;
     const color = getStatusColor(score);
     const date = new Date(item.created_at);
@@ -364,11 +363,7 @@ export default function HistoryScreen() {
         )}
       </View>
     );
-  });
-
-  const renderItem = useCallback(({ item, index }: { item: Decision; index: number }) => (
-    <HistoryItem item={item} index={index} />
-  ), [HistoryItem]);
+  }, [t, handleOpenChatModal, setReportModalVisible, setSelectedReportItem, handleDeleteItem]);
 
   const renderChatMessage = ({ item, index }: { item: ChatMessage; index: number }) => {
     return (
