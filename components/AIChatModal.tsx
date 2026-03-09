@@ -119,6 +119,7 @@ const AIChatModal: React.FC<AIChatModalProps> = ({
           conversation_history: conversationHistory,
           device_id: deviceId,
           language: i18n.language,
+          session_id: sessionId,
         }),
       });
 

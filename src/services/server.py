@@ -254,6 +254,7 @@ class AIFollowupRequest(BaseModel):
     device_id: str = ""
     hardware_fingerprint: Optional[str] = None
     language: str = "es"
+    session_id: Optional[str] = None
 
     class Config:
         extra = "ignore"
@@ -348,12 +349,15 @@ async def deduct_chat_credit(unique_key: str):
         logging.error(f"❌ Error deducting chat credit: {e}")
 
 # ============== HELPER PARA CHAT PERSISTENTE ==============
-async def save_chat_to_history(device_id: str, question: str, ai_response: str):
+async def save_chat_to_history(device_id: str, question: str, ai_response: str, session_id: Optional[str] = None):
     try:
-        recent_decision = await db['decisions'].find_one(
-            {"device_id": device_id},
-            sort=[("created_at", -1)]
-        )
+        if session_id:
+            recent_decision = await db['decisions'].find_one({"id": session_id})
+        else:
+            recent_decision = await db['decisions'].find_one(
+                {"device_id": device_id},
+                sort=[("created_at", -1)]
+            )
         
         if recent_decision:
             chat_entry = {
@@ -727,7 +731,8 @@ Provide brief, empathetic responses focused on eliminating biases and offering c
             save_chat_to_history,
             request.device_id,
             request.question,
-            ai_response_text
+            ai_response_text,
+            request.session_id
         )
         
         return {"success": True, "response": ai_response_text + disclaimer}

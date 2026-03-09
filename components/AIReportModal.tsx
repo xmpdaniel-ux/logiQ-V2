@@ -16,6 +16,69 @@ interface AIReportModalProps {
   category?: string;
 }
 
+const renderInlineMarkdown = (text: string, lineIndex: number) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, partIndex) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <Text key={`bold-${lineIndex}-${partIndex}`} style={{ fontWeight: 'bold', color: '#1A252F' }}>
+          {part.slice(2, -2)}
+        </Text>
+      );
+    }
+    return part;
+  });
+};
+
+const renderMarkdown = (text: string, styles: any) => {
+  if (!text) return null;
+
+  const lines = text.split('\n');
+  return lines.map((line, lineIndex) => {
+    if (line.trim() === '') {
+      return <Text key={`empty-${lineIndex}`} style={styles.reportText}> </Text>;
+    }
+
+    const headerMatch = line.match(/^(#{1,6})\s+(.*)/);
+    if (headerMatch) {
+      const level = headerMatch[1].length;
+      const content = headerMatch[2];
+      const fontSize = Math.max(16, 24 - (level * 2));
+      return (
+        <View key={`h-${lineIndex}`} style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 8 }}>
+          <View style={{ width: 4, height: fontSize, backgroundColor: '#3498DB', marginRight: 8, borderRadius: 2 }} />
+          <Text style={{ fontWeight: 'bold', fontSize, color: '#2C3E50' }}>
+            {renderInlineMarkdown(content, lineIndex)}
+          </Text>
+        </View>
+      );
+    }
+
+    const listMatch = line.match(/^(\s*)([-*+]|\d+\.)\s+(.*)/);
+    if (listMatch) {
+      const indent = listMatch[1].length * 10;
+      const bullet = listMatch[2];
+      const content = listMatch[3];
+      return (
+        <View key={`li-${lineIndex}`} style={{ flexDirection: 'row', marginLeft: indent, marginTop: 4, marginBottom: 4 }}>
+          <Text style={{ width: 24, fontSize: 16, color: '#2C3E50', fontWeight: bullet.endsWith('.') ? 'bold' : 'normal' }}>
+            {bullet === '-' || bullet === '*' || bullet === '+' ? '•' : bullet}
+          </Text>
+          <Text style={{ flex: 1, fontSize: 15, lineHeight: 24, color: '#2C3E50' }}>
+            {renderInlineMarkdown(content, lineIndex)}
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <Text key={`p-${lineIndex}`} style={styles.reportText}>
+        {renderInlineMarkdown(line, lineIndex)}
+      </Text>
+    );
+  });
+};
+
 const AIReportModal: React.FC<AIReportModalProps> = ({
   visible,
   loading,
@@ -126,7 +189,9 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
 
             {report && !loading && !error && (
               <View style={styles.reportContainer}>
-                <Text style={styles.reportText}>{report}</Text>
+                <View style={{ marginBottom: 16 }}>
+                  {renderMarkdown(report, styles)}
+                </View>
 
                 {/* Legal Disclaimer - Only for Finance category */}
                 {isFinanceCategory && (

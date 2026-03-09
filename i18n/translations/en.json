@@ -264,5 +264,6 @@
   "PAYWALL_COMING_SOON_MESSAGE": "This feature will be available when the app is published",
   "PAYWALL_ALREADY_PRO": "Active Subscription",
   "PAYWALL_ALREADY_PRO_DESC": "Your LogiQ subscription is active. You can manage or change your plan on Google Play.",
-  "MANAGE_SUBSCRIPTION": "Manage subscription"
+  "MANAGE_SUBSCRIPTION": "Manage subscription",
+  "BTN_VIEW_REPORT": "View AI Report"
 }

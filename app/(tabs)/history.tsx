@@ -19,6 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import { usePremium } from '../../contexts/PremiumContext';
+import AIReportModal from '../../components/AIReportModal';
 
 const { width } = Dimensions.get('window');
 const HISTORY_KEY = '@fdu_history';
@@ -357,7 +358,7 @@ export default function HistoryScreen() {
           >
             <Ionicons name="ribbon-outline" size={16} color="#F1C40F" />
             <Text style={styles.reportIndicatorText}>
-              {t('BTN_AI_REPORT') || 'Ver reporte IA'}
+              {t('BTN_VIEW_REPORT') || 'Ver reporte IA'}
             </Text>
           </TouchableOpacity>
         )}
@@ -513,76 +514,17 @@ export default function HistoryScreen() {
       </Modal>
 
       {/* Modal de Reporte IA */}
-      <Modal
+      <AIReportModal
         visible={reportModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setReportModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <View style={styles.modalHeaderTitleRow}>
-                <Ionicons name="ribbon" size={24} color="#F1C40F" />
-                <Text style={styles.modalTitle}>{t('AI_REPORT_TITLE') || 'Reporte IA'}</Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                {selectedReportItem && (
-                  <TouchableOpacity
-                    onPress={() => copyToClipboard(selectedReportItem.ai_report, selectedReportItem.result.score)}
-                    style={{ marginRight: 15 }}
-                  >
-                    <Ionicons name="copy-outline" size={24} color="#3498DB" />
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity onPress={() => setReportModalVisible(false)}>
-                  <Ionicons name="close-circle" size={28} color="#A4B0BE" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false} contentContainerStyle={styles.chatScrollContent}>
-              {selectedReportItem && (
-                <View>
-                  {/* FDU Score Bubble */}
-                  <View style={[styles.chatMessageContainer, styles.aiMessageContainer]}>
-                    <View style={styles.aiAvatarSmall}>
-                      <MaterialCommunityIcons name="shield-check" size={12} color="#FFF" />
-                    </View>
-                    <View style={[styles.chatBubble, styles.aiBubble, styles.elevatedBubble, { borderColor: getStatusColor(selectedReportItem.result.score) }]}>
-                      <Text style={styles.fduLabel}>{t('RESULT_SCORE')}</Text>
-                      <Text style={[styles.bigScore, { color: getStatusColor(selectedReportItem.result.score), fontSize: 32 }]}>
-                        {selectedReportItem.result.score.toFixed(1)}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Diagnosis Bubble */}
-                  <View style={[styles.chatMessageContainer, styles.aiMessageContainer]}>
-                    <View style={styles.aiAvatarSmall}>
-                      <MaterialCommunityIcons name="robot" size={12} color="#FFF" />
-                    </View>
-                    <View style={[styles.chatBubble, styles.aiBubble, styles.elevatedBubble]}>
-                      <Text style={[styles.chatMessageText, styles.aiMessageText]}>
-                        {selectedReportItem.ai_report}
-                      </Text>
-                      <Text style={[styles.chatTimestamp, styles.aiTimestamp]}>
-                        {new Date(selectedReportItem.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              )}
-            </ScrollView>
-
-            <View style={styles.modalFooter}>
-              <TouchableOpacity style={styles.closeButton} onPress={() => setReportModalVisible(false)}>
-                <Text style={styles.closeButtonText}>{t('BTN_CLOSE') || 'Cerrar'}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        loading={false}
+        report={selectedReportItem?.ai_report || null}
+        error={null}
+        onClose={() => {
+          setReportModalVisible(false);
+          setSelectedReportItem(null);
+        }}
+        category={selectedReportItem?.category}
+      />
     </SafeAreaView>
   );
 }
