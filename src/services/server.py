@@ -468,6 +468,7 @@ async def register_user(user_data: UserCreate):
         user = await get_or_create_user(user_data.device_id, user_data.hardware_fingerprint)
         return {
             "success": True,
+            "support_id": str(user.get('_id', user.get('id', ''))),
             "report_credits": user.get('report_credits', 2),
             "chat_credits": user.get('chat_credits', 4),
             "is_premium": user.get('is_premium', False)

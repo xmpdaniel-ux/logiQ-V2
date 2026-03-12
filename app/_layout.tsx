@@ -4,6 +4,7 @@ import { PremiumProvider } from '../contexts/PremiumContext';
 import { useTranslation } from 'react-i18next';
 import { requestNotificationPermissions, scheduleStrategicReminder } from '../utils/NotificationService';
 import { StatusBar } from 'expo-status-bar';
+import PrivacyConsentModal from '../components/PrivacyConsentModal';
 import '../i18n';
 
 export default function RootLayout() {
@@ -42,6 +43,7 @@ export default function RootLayout() {
           }}
         />
       </Stack>
+      <PrivacyConsentModal />
     </PremiumProvider>
   );
 }

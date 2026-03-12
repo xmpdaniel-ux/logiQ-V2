@@ -57,6 +57,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
   const [showTooltip, setShowTooltip] = useState(false);
 
   // AI Report states
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [aiModalVisible, setAiModalVisible] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiReport, setAiReport] = useState<string | null>(null);
@@ -359,9 +360,28 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
 
   const renderSlider = (key: keyof FDUInput, labelKey: string) => {
     const currentValue = inputs?.[key] ?? 5;
+    const tooltipKey = `TOOLTIP_${key.toUpperCase()}`;
     return (
       <View style={styles.sliderContainer} key={key}>
-        <Text style={styles.questionText}>{t(labelKey)}</Text>
+        <TouchableOpacity 
+          style={{ flexDirection: 'row', alignItems: 'center' }}
+          onPress={() => setActiveTooltip(activeTooltip === key ? null : key)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.questionText}>{t(labelKey)}</Text>
+          <Ionicons name="information-circle-outline" size={16} color="#3498DB" style={{ marginLeft: 6, marginBottom: 8 }} />
+        </TouchableOpacity>
+
+        {activeTooltip === key && (
+          <Animated.View entering={FadeIn.duration(400)} exiting={FadeOut.duration(200)} style={[styles.tooltipBubble, { marginBottom: 12 }]}>
+            <View style={styles.tooltipContent}>
+              <Ionicons name="information-circle-outline" size={16} color="#3498DB" />
+              <Text style={styles.tooltipText}>{t(tooltipKey)}</Text>
+            </View>
+            <View style={styles.tooltipArrow} />
+          </Animated.View>
+        )}
+
         <View style={styles.sliderRow}>
           <Text style={styles.sliderValue}>1</Text>
           <Slider

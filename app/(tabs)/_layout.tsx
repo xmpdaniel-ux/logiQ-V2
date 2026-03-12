@@ -2,7 +2,7 @@ import React from 'react';
 import { Tabs, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { TouchableOpacity, StyleSheet, Platform, View, Text, Alert } from 'react-native';
+import { TouchableOpacity, StyleSheet, Platform, View, Text, Alert, Linking } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { usePremium } from '../../contexts/PremiumContext';
 

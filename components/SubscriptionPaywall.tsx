@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Modal, View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Platform, Dimensions, Alert, Linking
+  ActivityIndicator, Platform, Dimensions, Alert, Linking, ScrollView
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,7 +15,7 @@ const PLAN_IDS = {
   ANNUAL: 'logiq-annual-v2'
 };
 
-const APP_VERSION_TAG = '2.0.4.0 (Build 144)';
+const APP_VERSION_TAG = '2.0.4.1 (Build 145)';
 
 interface SubscriptionPaywallProps {
   visible: boolean;
@@ -33,7 +33,7 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
   language = 'es'
 }) => {
   const { t } = useTranslation();
-  const { requestPurchase, isPremium } = usePremium();
+  const { requestPurchase, isPremium, supportId } = usePremium();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'quarterly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
   const [purchaseState, setPurchaseState] = useState<'idle' | 'success' | 'error'>('idle');
@@ -307,6 +307,11 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
               <TouchableOpacity onPress={onClose} style={[styles.laterButton, { marginTop: 16 }]}>
                 <Text style={styles.laterText}>{t('PAYWALL_CLOSE') || 'Cerrar'}</Text>
               </TouchableOpacity>
+
+              <Text style={{ fontSize: 10, color: '#BDC3C7', marginTop: 24, textAlign: 'center' }}>
+                Support ID: {supportId || 'N/A'}{'\n'}
+                Use this ID for data deletion requests
+              </Text>
             </View>
           </View>
         </View>
@@ -323,9 +328,10 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
             <Ionicons name="close" size={28} color="#7F8C8D" />
           </TouchableOpacity>
 
-          {/* Header */}
-          <View style={styles.header}>
-            {(trigger === 'out_of_report_credits' || trigger === 'out_of_chat_credits') && (
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+            {/* Header */}
+            <View style={styles.header}>
+              {(trigger === 'out_of_report_credits' || trigger === 'out_of_chat_credits') && (
               <View style={styles.alertBadge}>
                 <Ionicons name="alert-circle" size={16} color="#FFFFFF" />
                 <Text style={styles.alertText}>{t('PAYWALL_OUT_OF_CREDITS')}</Text>
@@ -475,10 +481,15 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
             <Text style={styles.termsLink} onPress={handleOpenLegal}>{t('PAYWALL_PRIVACY_LINK')}</Text>
           </Text>
 
-          {/* Maybe Later */}
           <TouchableOpacity onPress={onClose} style={styles.laterButton}>
             <Text style={styles.laterText}>{t('PAYWALL_CLOSE')}</Text>
           </TouchableOpacity>
+
+          <Text style={{ fontSize: 10, color: '#BDC3C7', marginTop: 16, textAlign: 'center' }}>
+            Support ID: {supportId || 'N/A'}{'\n'}
+            Use this ID for data deletion requests
+          </Text>
+          </ScrollView>
         </View>
       </View>
     </Modal>

@@ -20,6 +20,7 @@ interface PremiumContextType {
   reportCredits: number;
   chatCredits: number;
   deviceId: string;
+  supportId: string;
   isLoading: boolean;
   showPaywall: boolean;
   language: string;
@@ -73,6 +74,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [reportCredits, setReportCredits] = useState(2);
   const [chatCredits, setChatCredits] = useState(2);
   const [deviceId, setDeviceId] = useState('');
+  const [supportId, setSupportId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [showPaywall, setShowPaywallState] = useState(false);
   const [paywallTrigger, setPaywallTrigger] = useState<'out_of_report_credits' | 'out_of_chat_credits' | 'manual'>('manual');
@@ -249,6 +251,9 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
 
         if (response.ok) {
           const data = await response.json();
+          const suppId = data.support_id || id;
+          setSupportId(suppId);
+          await AsyncStorage.setItem('@support_id', suppId);
           if (data.is_premium) {
             setIsPremium(true);
             setReportCredits(999);
@@ -283,10 +288,12 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const loadCachedStatus = async () => {
     try {
+      const cachedSupportId = await AsyncStorage.getItem('@support_id');
       const cachedReportCredits = await AsyncStorage.getItem(REPORT_CREDITS_KEY);
       const cachedChatCredits = await AsyncStorage.getItem(CHAT_CREDITS_KEY);
       const cachedPremium = await AsyncStorage.getItem(PREMIUM_KEY);
 
+      if (cachedSupportId) setSupportId(cachedSupportId);
       if (cachedReportCredits !== null) setReportCredits(parseInt(cachedReportCredits, 10));
       if (cachedChatCredits !== null) setChatCredits(parseInt(cachedChatCredits, 10));
       if (cachedPremium !== null) setIsPremium(cachedPremium === 'true');
@@ -360,6 +367,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
         reportCredits,
         chatCredits,
         deviceId,
+        supportId,
         isLoading,
         showPaywall,
         language: i18n.language || 'en',
