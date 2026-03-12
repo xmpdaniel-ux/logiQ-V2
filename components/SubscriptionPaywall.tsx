@@ -304,7 +304,13 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
                 <Text style={[styles.purchaseButtonText, { marginLeft: 8 }]}>{t('MANAGE_SUBSCRIPTION') || 'Gestionar suscripción'}</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={onClose} style={[styles.laterButton, { marginTop: 16 }]}>
+              <TouchableOpacity onPress={handleOpenLegal} style={{ marginTop: 16, padding: 8 }}>
+                <Text style={{ color: '#3498DB', fontSize: 13, textDecorationLine: 'underline', fontWeight: 'bold' }}>
+                  {t('BTN_TERMS_SERVICE') || 'Términos del Servicio'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={onClose} style={[styles.laterButton, { marginTop: 10 }]}>
                 <Text style={styles.laterText}>{t('PAYWALL_CLOSE') || 'Cerrar'}</Text>
               </TouchableOpacity>
 
