@@ -422,29 +422,30 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         </View>
         <Text style={styles.headerTitle}>{t(titleKey)}</Text>
       </View>
-
-      <TouchableOpacity
-        style={isPremium ? styles.proActiveBanner : styles.premiumBanner}
-        onPress={() => setShowProfileModal(true)}
-      >
-        <View style={styles.premiumBannerLeft}>
-          <MaterialCommunityIcons 
-            name="diamond" 
-            size={20} 
-            color={isPremium ? "#F1C40F" : "#3498DB"} 
-          />
-          <View style={styles.premiumBannerText}>
-            <Text style={isPremium ? styles.proActiveBannerText : styles.premiumBannerTitle}>
-              {isPremium ? t('BTN_PROFILE_PRO') : t('BTN_PROFILE_FREE', { count: reportCredits + chatCredits })}
+      {isPremium ? (
+        <TouchableOpacity
+          style={styles.proActiveBanner}
+          onPress={() => setShowProfileModal(true)}
+        >
+          <MaterialCommunityIcons name="crown" size={20} color="#F1C40F" />
+          <Text style={styles.proActiveBannerText}>{t('BTN_PROFILE_PRO') || 'Perfil Pro'}</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={styles.premiumBanner}
+          onPress={() => setShowProfileModal(true)}
+        >
+          <View style={styles.premiumBannerLeft}>
+            <MaterialCommunityIcons name="crown" size={20} color="#F1C40F" />
+            <Text style={styles.premiumBannerTitle}>
+              {t('BTN_PROFILE_FREE', { count: reportCredits + chatCredits }) || `Perfil · ${reportCredits + chatCredits} Pruebas Gratis`}
             </Text>
           </View>
-        </View>
-        {!isPremium && (
           <View style={[styles.creditBadgeInline, (reportCredits === 0 && chatCredits === 0) && styles.creditBadgeEmpty]}>
             <Text style={styles.creditBadgeText}>{reportCredits + chatCredits}</Text>
           </View>
-        )}
-      </TouchableOpacity>
+        </TouchableOpacity>
+      )}
 
       <ProfileModal 
         visible={showProfileModal} 

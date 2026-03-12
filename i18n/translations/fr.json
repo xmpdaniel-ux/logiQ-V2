@@ -93,5 +93,6 @@
   "MODAL_LEGAL_TERMS": "Conditions d'Utilisation",
   "MODAL_SUPPORT_FOOTER": "Pour demander la suppression de vos données, veuillez vous identifier avec l'ID de support ci-dessus oü utilisez le bouton 'Tout effacer' dans votre historique.",
   "MODAL_ACCOUNT_FREE": "Compte Gratuit",
-  "MODAL_ACCOUNT_PRO": "Compte LogiQ Pro"
+  "MODAL_ACCOUNT_PRO": "Abonnement Actif",
+  "BTN_TERMS_SERVICE": "Conditions d'Utilisation"
 }

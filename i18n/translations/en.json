@@ -95,5 +95,6 @@
   "MODAL_LEGAL_TERMS": "Terms of Service",
   "MODAL_SUPPORT_FOOTER": "To request your data deletion, please identify yourself with the Support ID above or use the 'Clear All' button in your History.",
   "MODAL_ACCOUNT_FREE": "Free Account",
-  "MODAL_ACCOUNT_PRO": "LogiQ Pro Account"
+  "MODAL_ACCOUNT_PRO": "Active Subscription",
+  "BTN_TERMS_SERVICE": "Terms of Service"
 }

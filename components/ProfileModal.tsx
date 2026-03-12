@@ -48,9 +48,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose }) => {
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Status Section */}
             <View style={styles.statusSection}>
-              <View style={[styles.diamondContainer, isActuallyPro ? styles.diamondPro : styles.diamondFree]}>
+              <View style={[styles.crownContainer, isActuallyPro ? styles.crownPro : styles.crownFree]}>
                 <MaterialCommunityIcons 
-                  name="diamond" 
+                  name="crown" 
                   size={48} 
                   color={isActuallyPro ? "#F1C40F" : "#94A3B8"} 
                 />
@@ -86,26 +86,24 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose }) => {
                     setShowPaywall(true, 'manual');
                   }}
                 >
-                  <MaterialCommunityIcons name="diamond" size={20} color="#FFFFFF" />
+                  <MaterialCommunityIcons name="crown" size={20} color="#FFFFFF" />
                   <Text style={styles.upgradeButtonText}>{t('UPGRADE_TITLE') || 'Desbloquear Plan Pro'}</Text>
                 </TouchableOpacity>
               )}
             </View>
 
-            {/* Support Section */}
-            <View style={styles.infoSection}>
-              <Text style={styles.sectionTitle}>{t('SUPPORT_ID') || 'Support ID'}</Text>
-              <View style={styles.idContainer}>
-                <Text style={styles.idText}>{supportId || 'N/A'}</Text>
-                <TouchableOpacity 
-                  onPress={() => {
-                    // Could add checkboard copy here if needed
-                  }}
-                >
-                  <Ionicons name="copy-outline" size={18} color="#3498DB" />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.infoText}>
+            {/* Support ID / Legal Section */}
+            <View style={styles.supportContainer}>
+              <Text style={styles.supportIdText}>Support ID: {supportId || 'N/A'}</Text>
+              
+              <TouchableOpacity 
+                style={styles.legalButtonSutil}
+                onPress={handleOpenLegal}
+              >
+                <Text style={styles.legalButtonTextSutil}>{t('BTN_TERMS_SERVICE') || 'Términos del Servicio'}</Text>
+              </TouchableOpacity>
+              
+              <Text style={styles.supportFooterText}>
                 {t('MODAL_SUPPORT_FOOTER')}
               </Text>
             </View>
@@ -156,7 +154,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 32,
   },
-  diamondContainer: {
+  crownContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
@@ -169,12 +167,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
   },
-  diamondPro: {
+  crownPro: {
     backgroundColor: '#FFFBEB',
     borderWidth: 2,
     borderColor: '#F1C40F',
   },
-  diamondFree: {
+  crownFree: {
     backgroundColor: '#F8FAFC',
     borderWidth: 2,
     borderColor: '#E2E8F0',
@@ -280,6 +278,36 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#334155',
     marginLeft: 12,
+  },
+  supportContainer: {
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 20,
+    marginBottom: 20,
+  },
+  supportIdText: {
+    fontSize: 11,
+    color: '#94A3B8',
+    marginBottom: 10,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  legalButtonSutil: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+  legalButtonTextSutil: {
+    color: '#3498DB',
+    fontSize: 14,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  supportFooterText: {
+    fontSize: 10,
+    color: '#BDC3C7',
+    textAlign: 'center',
+    lineHeight: 14,
   },
 });
 
