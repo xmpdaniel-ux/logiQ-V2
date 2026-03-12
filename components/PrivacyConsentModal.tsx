@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, Linking, SafeAreaView } from 'react-native';
+import { Modal, View, Text, StyleSheet, TouchableOpacity, Linking, SafeAreaView, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ const PRIVACY_KEY = '@accepted_privacy_version';
 const PrivacyConsentModal = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
+  const [accepted, setAccepted] = useState(false);
 
   useEffect(() => {
     checkConsent();
@@ -19,6 +20,8 @@ const PrivacyConsentModal = () => {
     try {
       const version = await AsyncStorage.getItem(PRIVACY_KEY);
       if (version !== PRIVACY_VERSION) {
+        // Reset accepted state when modal becomes visible due to version mismatch
+        setAccepted(false);
         setVisible(true);
       }
     } catch (e) {
@@ -27,6 +30,7 @@ const PrivacyConsentModal = () => {
   };
 
   const handleAccept = async () => {
+    if (!accepted) return;
     try {
       await AsyncStorage.setItem(PRIVACY_KEY, PRIVACY_VERSION);
       setVisible(false);
@@ -47,23 +51,35 @@ const PrivacyConsentModal = () => {
       <View style={styles.overlay}>
         <SafeAreaView style={styles.container}>
           <View style={styles.content}>
-            <View style={styles.iconContainer}>
-              <Ionicons name="shield-checkmark" size={48} color="#3498DB" />
+            <View style={styles.header}>
+              <View style={styles.iconContainer}>
+                <Ionicons name="shield-checkmark" size={32} color="#3498DB" />
+              </View>
+              <Text style={styles.title}>{t('PRIVACY_CONSENT_TITLE') || 'Tu privacidad importa'}</Text>
             </View>
-            <Text style={styles.title}>{t('PRIVACY_CONSENT_TITLE') || 'Tu privacidad importa'}</Text>
             
-            <Text style={styles.text}>
-              {t('PRIVACY_CONSENT_TEXT') || 'Para continuar usando LogiQ, revisa y acepta nuestra Política de Privacidad y Términos de Servicio.'}
-            </Text>
+            <View style={styles.scrollContainer}>
+              <ScrollView showsVerticalScrollIndicator={true} style={styles.scrollView}>
+                <Text style={styles.text}>
+                  {t('PRIVACY_POLICY_CONTENT') || t('PRIVACY_CONSENT_TEXT')}
+                </Text>
+              </ScrollView>
+            </View>
 
-            <TouchableOpacity style={styles.linkButton} onPress={openLink}>
-              <Ionicons name="document-text-outline" size={20} color="#3498DB" />
-              <Text style={styles.linkText}>
-                {t('PRIVACY_POLICY_AND_TERMS') || 'Política de Privacidad y Términos'}
+            <TouchableOpacity style={styles.checkboxRow} onPress={() => setAccepted(!accepted)}>
+              <View style={[styles.checkbox, accepted && styles.checkboxActive]}>
+                {accepted && <Ionicons name="checkmark" size={16} color="#FFF" />}
+              </View>
+              <Text style={styles.checkboxLabel}>
+                {t('BTN_ACCEPT_TERMS') || 'Acepto los Términos y la Política de Privacidad'}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.acceptButton} onPress={handleAccept}>
+            <TouchableOpacity 
+              style={[styles.acceptButton, !accepted && styles.acceptButtonDisabled]} 
+              onPress={handleAccept}
+              disabled={!accepted}
+            >
               <Text style={styles.acceptButtonText}>{t('BTN_ACCEPT_AND_CONTINUE') || 'Aceptar y Continuar'}</Text>
             </TouchableOpacity>
           </View>
@@ -76,69 +92,94 @@ const PrivacyConsentModal = () => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'center',
     padding: 20,
   },
   container: {
     backgroundColor: '#FFF',
-    borderRadius: 20,
+    borderRadius: 24,
+    maxHeight: '85%',
     overflow: 'hidden',
     elevation: 10,
     shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
   },
   content: {
-    padding: 30,
+    padding: 24,
+  },
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 20,
+    gap: 12,
   },
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: '#EBF5FB',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '800',
     color: '#2C3E50',
-    marginBottom: 15,
-    textAlign: 'center',
+    flex: 1,
+  },
+  scrollContainer: {
+    height: 350,
+    backgroundColor: '#F8F9F9',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#EAECEE',
+  },
+  scrollView: {
+    flex: 1,
   },
   text: {
-    fontSize: 15,
-    color: '#7F8C8D',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 25,
+    fontSize: 14,
+    color: '#34495E',
+    lineHeight: 20,
   },
-  linkButton: {
+  checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F9FF',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginBottom: 25,
-    width: '100%',
-    justifyContent: 'center',
+    marginBottom: 24,
+    gap: 12,
   },
-  linkText: {
-    color: '#3498DB',
-    fontWeight: '700',
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#3498DB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxActive: {
+    backgroundColor: '#3498DB',
+  },
+  checkboxLabel: {
     fontSize: 14,
-    marginLeft: 8,
+    color: '#2C3E50',
+    fontWeight: '600',
+    flex: 1,
   },
   acceptButton: {
     backgroundColor: '#3498DB',
     width: '100%',
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 18,
+    borderRadius: 14,
     alignItems: 'center',
+  },
+  acceptButtonDisabled: {
+    backgroundColor: '#BDC3C7',
+    opacity: 0.7,
   },
   acceptButtonText: {
     color: '#FFF',

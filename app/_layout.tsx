@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { requestNotificationPermissions, scheduleStrategicReminder } from '../utils/NotificationService';
 import { StatusBar } from 'expo-status-bar';
 import PrivacyConsentModal from '../components/PrivacyConsentModal';
+import SubscriptionPaywall from '../components/SubscriptionPaywall';
+import { usePremium } from '../contexts/PremiumContext';
 import '../i18n';
 
 export default function RootLayout() {
@@ -23,6 +25,17 @@ export default function RootLayout() {
 
   return (
     <PremiumProvider>
+      <InnerLayout />
+    </PremiumProvider>
+  );
+}
+
+function InnerLayout() {
+  const { showPaywall, setShowPaywall, handlePurchaseSuccess, paywallTrigger } = usePremium();
+  const { t } = useTranslation();
+
+  return (
+    <>
       <StatusBar style="light" translucent={true} />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -30,7 +43,7 @@ export default function RootLayout() {
           name="history"
           options={{
             headerShown: true,
-            title: 'History',
+            title: t('P_TITULO_HIS') || 'History',
             presentation: 'modal'
           }}
         />
@@ -38,12 +51,20 @@ export default function RootLayout() {
           name="paywall"
           options={{
             headerShown: true,
-            title: 'Premium',
+            title: t('P_TITULO_PAY') || 'Premium',
             presentation: 'modal'
           }}
         />
       </Stack>
+      
       <PrivacyConsentModal />
-    </PremiumProvider>
+
+      <SubscriptionPaywall
+        visible={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        onPurchaseSuccess={handlePurchaseSuccess}
+        trigger={paywallTrigger}
+      />
+    </>
   );
 }

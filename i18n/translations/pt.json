@@ -62,6 +62,7 @@
   "BTN_CANCEL": "Cancelar",
   "BTN_DELETE": "Excluir",
   "BTN_CONFIRM": "Confirmar",
+  "BTN_ACCEPT_TERMS": "Aceito os Termos e a Política de Privacidade",
   "BTN_START_FIRST_AUDIT": "Começar Auditoria",
   "RESULT_SCORE": "Pontuação FDU",
   "RESULT_STATUS": "Status",
@@ -253,5 +254,6 @@
   "TOOLTIP_C1": "Complexidade Técnica",
   "TOOLTIP_C2": "Riscos Prováveis",
   "TOOLTIP_R1": "Reversibilidade (facilidade de voltar atrás)",
-  "TOOLTIP_R2": "Confiança nos Dados"
+  "TOOLTIP_R2": "Confiança nos Dados",
+  "PRIVACY_POLICY_CONTENT": "📄 Política de Privacidade e Isenção de Responsabilidade Profissional (LogiQ)\n\nDesenvolvedor: Favio Daniel Diaz Vargas | Aplicação: LogiQ\n\nExclusão de Dados: Para excluir seus datos, acesse Histórico > Limpar Tudo no aplicativo ou entre em contato com logiq.app.contact@gmail.com. Os dados (Android ID) são removidos permanentemente de nossos servidores e nenhum dado é retido após esta ação.\n\nIsenção de Responsabilidade (IMPORTANTE): O LogiQ é uma ferramenta de suporte tecnológico. As informações geradas não constituem aconselhamento financeiro, de investimento, jurídico ou tributário. Favio Daniel Diaz Vargas (Desenvolvedor LogiQ) não se responsabiliza por quaisquer perdas financeiras."
 }

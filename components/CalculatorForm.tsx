@@ -573,14 +573,6 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         sessionId={currentSessionId || ''}
         onClose={() => setChatModalVisible(false)}
       />
-
-      <SubscriptionPaywall
-        visible={showPaywall}
-        onClose={() => setShowPaywall(false)}
-        onPurchaseSuccess={handlePurchaseSuccess}
-        trigger={paywallTrigger}
-        language={i18n.language?.startsWith('es') ? 'es' : 'en'}
-      />
     </ScrollView>
   );
 };
