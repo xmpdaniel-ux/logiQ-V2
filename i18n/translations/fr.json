@@ -70,10 +70,10 @@
   "MSG_CONNECTION_ERROR": "Erreur de connexion",
   "MSG_AI_ERROR": "Erreur du service IA",
   "MSG_NO_REPORT": "Impossible de générer le rapport",
-  "TOOLTIP_DESC_NEG": "Analysez la rentabilité par rapport au coût, pondérée par le risque d'exécution et la réversibilité stratégique.",
+  "TOOLTIP_DESC_NEG": "Analysez la rentabilité par rapport al coût, pondérée par le risque d'exécution et la réversibilité stratégique.",
   "TOOLTIP_DESC_CAR": "Évaluez la croissance professionnelle par rapport à l'effort, en tenant compte de l'impact personnel et des options futures.",
   "TOOLTIP_DESC_REL": "Évaluez la valeur personnelle par rapport à l'effort émotionnel, en privilégiant la stabilité à long terme et les valeurs fondamentales.",
-  "TOOLTIP_DESC_FIN": "Mesurez le ROI financier par rapport au risque, en tenant compte de la liquidité et de la confiance du marché.",
+  "TOOLTIP_DESC_FIN": "Mesurez le ROI financier par rapport al risque, en tenant compte de la liquidité et de la confiance du marché.",
   "PRIVACY_CONSENT_TITLE": "Votre vie privée compte",
   "PRIVACY_CONSENT_TEXT": "Pour continuer à utiliser LogiQ, veuillez consulter et accepter notre politique de confidentialité et nos conditions d'utilisation.",
   "PRIVACY_POLICY_AND_TERMS": "Politique de confidentialité et conditions",
@@ -86,5 +86,12 @@
   "TOOLTIP_C2": "Risques Probables",
   "TOOLTIP_R1": "Réversibilité (facilité de faire marche arrière)",
   "TOOLTIP_R2": "Confiance dans les données",
-  "PRIVACY_POLICY_CONTENT": "📄 Politique de confidentialité et avis de non-responsabilité (LogiQ)\n\nDéveloppeur: Favio Daniel Diaz Vargas | Application: LogiQ\n\nSuppression des données: Pour supprimer vos données, allez dans Historique > Tout effacer dans l'application, ou contactez logiq.app.contact@gmail.com. Les données (Android ID) sont supprimées définitivement de nos serveurs sans période de rétention supplémentaire. \n\nAvis de non-responsabilité (IMPORTANT): LogiQ est un outil de support technologique. Les informations générées ne constituent pas des conseils financiers, d'investissement, juridiques ou fiscaux. Favio Daniel Diaz Vargas (LogiQ Developer) n'est pas responsable des pertes financières."
+  "PRIVACY_POLICY_CONTENT": "📄 Politique de confidentialité et avis de non-responsabilité (LogiQ)\n\nDéveloppeur: Favio Daniel Diaz Vargas | Application: LogiQ\n\nSuppression des données: Pour supprimer vos données, allez dans Historique > Tout effacer dans l'application, ou contactez logiq.app.contact@gmail.com. Les données (Android ID) sont supprimées définitivement de nos serveurs sans période de rétention supplémentaire. \n\nAvis de non-responsabilité (IMPORTANT): LogiQ est un outil de support technologique. Les informations générées ne constituent pas des conseils financiers, d'investissement, juridiques ou fiscaux. Favio Daniel Diaz Vargas (LogiQ Developer) n'est pas responsable des pertes financières.",
+  "BTN_PROFILE_PRO": "Profil Pro",
+  "BTN_PROFILE_FREE": "Profil · {{count}} Essais Gratuits",
+  "MODAL_PROFILE_TITLE": "Mon Profil",
+  "MODAL_LEGAL_TERMS": "Conditions d'Utilisation",
+  "MODAL_SUPPORT_FOOTER": "Pour demander la suppression de vos données, veuillez vous identifier avec l'ID de support ci-dessus oü utilisez le bouton 'Tout effacer' dans votre historique.",
+  "MODAL_ACCOUNT_FREE": "Compte Gratuit",
+  "MODAL_ACCOUNT_PRO": "Compte LogiQ Pro"
 }

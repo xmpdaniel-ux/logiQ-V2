@@ -12,6 +12,7 @@ import ResultCard from './ResultCard';
 import AIReportModal from './AIReportModal';
 import AIChatModal from './AIChatModal';
 import SubscriptionPaywall from './SubscriptionPaywall';
+import ProfileModal from './ProfileModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as StoreReview from 'expo-store-review';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -55,6 +56,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
   const [context, setContext] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // AI Report states
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
@@ -421,38 +423,33 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         <Text style={styles.headerTitle}>{t(titleKey)}</Text>
       </View>
 
-      {isPremium && (
-        <TouchableOpacity
-          style={styles.proActiveBanner}
-          onPress={() => setShowPaywall(true, 'manual')}
-        >
-          <MaterialCommunityIcons name="crown" size={20} color="#F1C40F" />
-          <Text style={styles.proActiveBannerText}>{t('PAYWALL_ALREADY_PRO') || 'LogiQ Pro Active'}</Text>
-        </TouchableOpacity>
-      )}
-
-      {!isPremium && (
-        <TouchableOpacity
-          style={styles.premiumBanner}
-          onPress={() => setShowPaywall(true, 'manual')}
-        >
-          <View style={styles.premiumBannerLeft}>
-            <View style={styles.premiumBannerText}>
-              <Text style={styles.premiumBannerTitle}>
-                {reportCredits > 0 || chatCredits > 0 ? t('PREMIUM_BANNER_TITLE') : t('UPGRADE_TITLE')}
-              </Text>
-              <Text style={styles.premiumBannerSubtitle}>
-                {reportCredits > 0 || chatCredits > 0
-                  ? `${reportCredits} ${t('CREDITS_REPORTS')} + ${chatCredits} ${t('CREDITS_CHATS')}`
-                  : t('PREMIUM_BANNER_SUBTITLE')}
-              </Text>
-            </View>
+      <TouchableOpacity
+        style={isPremium ? styles.proActiveBanner : styles.premiumBanner}
+        onPress={() => setShowProfileModal(true)}
+      >
+        <View style={styles.premiumBannerLeft}>
+          <MaterialCommunityIcons 
+            name="diamond" 
+            size={20} 
+            color={isPremium ? "#F1C40F" : "#3498DB"} 
+          />
+          <View style={styles.premiumBannerText}>
+            <Text style={isPremium ? styles.proActiveBannerText : styles.premiumBannerTitle}>
+              {isPremium ? t('BTN_PROFILE_PRO') : t('BTN_PROFILE_FREE', { count: reportCredits + chatCredits })}
+            </Text>
           </View>
+        </View>
+        {!isPremium && (
           <View style={[styles.creditBadgeInline, (reportCredits === 0 && chatCredits === 0) && styles.creditBadgeEmpty]}>
             <Text style={styles.creditBadgeText}>{reportCredits + chatCredits}</Text>
           </View>
-        </TouchableOpacity>
-      )}
+        )}
+      </TouchableOpacity>
+
+      <ProfileModal 
+        visible={showProfileModal} 
+        onClose={() => setShowProfileModal(false)} 
+      />
 
       <View style={styles.contextContainer}>
         <Text style={styles.contextLabel}>{t('CONTEXT_LABEL')}</Text>

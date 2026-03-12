@@ -19,7 +19,7 @@
     },
     "android": {
       "package": "com.logiq.app.pro",
-      "versionCode": 146,
+      "versionCode": 147,
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -28,7 +28,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.logiq.app.pro",
-      "buildNumber": "146"
+      "buildNumber": "147"
     },
     "plugins": [
       "expo-router",
