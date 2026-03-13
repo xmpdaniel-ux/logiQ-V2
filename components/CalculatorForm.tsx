@@ -273,14 +273,23 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     try {
       const backendUrl = 'https://logiq-production.up.railway.app/api';
       const currentDeviceId = await getDeviceId();
+      const { activePurchaseToken } = usePremium(); // Getting token directly inside or from closure if needed, but let's ensure it's available
 
       // Timeout guard: 15 seconds for AI generation (User request for Build 120)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
 
+      const headers: Record<string, string> = { 
+        'Content-Type': 'application/json' 
+      };
+      
+      if (activePurchaseToken) {
+        headers['X-Purchase-Token'] = activePurchaseToken;
+      }
+
       const response = await fetch(`${backendUrl}/generate-ai-report`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         signal: controller.signal,
         body: JSON.stringify({
           category,
@@ -295,7 +304,8 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
           language: i18n.language || 'es',
           detailed_analysis: true,
           include_biases: true,
-          domain_context: category
+          domain_context: category,
+          purchase_token: activePurchaseToken // Also include in body for redundancy
         })
       });
 

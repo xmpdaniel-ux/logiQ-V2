@@ -32,6 +32,7 @@ interface PremiumContextType {
   refreshUserStatus: () => Promise<void>;
   handlePurchaseSuccess: () => void;
   getDeviceId: () => string;
+  activePurchaseToken: string | null;
   requestPurchase: (sku: string, params: { offerToken?: string, basePlanId?: string }) => Promise<void>;
 }
 
@@ -76,6 +77,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [chatCredits, setChatCredits] = useState(2);
   const [deviceId, setDeviceId] = useState('');
   const [supportId, setSupportId] = useState('');
+  const [activePurchaseToken, setActivePurchaseToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showPaywall, setShowPaywallState] = useState(false);
   const [paywallTrigger, setPaywallTrigger] = useState<'out_of_report_credits' | 'out_of_chat_credits' | 'manual'>('manual');
@@ -140,6 +142,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
               })
             }).then(resp => {
               clearTimeout(timeoutId);
+              if (purchase.purchaseToken) setActivePurchaseToken(purchase.purchaseToken);
               if (!resp.ok) console.warn('Background verification failed, but user has local access');
             }).catch(e => {
               clearTimeout(timeoutId);
@@ -185,6 +188,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
         setIsPremium(true);
         setChatCredits(999);
         setReportCredits(999);
+        setActivePurchaseToken(activePurchase.purchaseToken || null);
         await AsyncStorage.setItem(PREMIUM_KEY, 'true');
 
         // Sync local premium status with Backend continuously to prevent 402 errors
@@ -387,6 +391,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
         refreshUserStatus,
         handlePurchaseSuccess,
         getDeviceId,
+        activePurchaseToken,
         requestPurchase,
       }}
     >

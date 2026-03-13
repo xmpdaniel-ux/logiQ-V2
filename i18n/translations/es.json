@@ -93,7 +93,7 @@
   "STATUS_YELLOW": "Precaución: Evalúa más detalles",
   "STATUS_RED": "Riesgo alto: No recomendado",
   "STATUS_GREEN_NEG": "¡Adelante! Es una oportunidad estratégica sólida",
-  "STATUS_YELLOW_NEG": "Precaución: Evalúa mejor los riesgos financieros",
+  "STATUS_YELLOW_NEG": "Caution / Precaución",
   "STATUS_RED_NEG": "Riesgo de negocio alto. Considera alternativas",
   "STATUS_GREEN_CAR": "¡Es una gran oportunidad de crecimiento!",
   "STATUS_YELLOW_CAR": "Interesante, pero prepárate un poco mejor",
