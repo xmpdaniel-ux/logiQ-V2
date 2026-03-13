@@ -37,7 +37,8 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     checkReportCredits,
     checkChatCredits,
     handlePurchaseSuccess,
-    refreshUserStatus
+    refreshUserStatus,
+    activePurchaseToken
   } = usePremium();
   const insets = useSafeAreaInsets();
 
@@ -269,45 +270,44 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     setAiLoading(true);
     setAiReport(null);
     setAiError(null);
-
     try {
-      const backendUrl = 'https://logiq-production.up.railway.app/api';
-      const currentDeviceId = await getDeviceId();
-      const { activePurchaseToken } = usePremium(); // Getting token directly inside or from closure if needed, but let's ensure it's available
 
-      // Timeout guard: 15 seconds for AI generation (User request for Build 120)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const backendUrl = 'https://logiq-production.up.railway.app/api';
+    const currentDeviceId = await getDeviceId();
 
-      const headers: Record<string, string> = { 
-        'Content-Type': 'application/json' 
-      };
-      
-      if (activePurchaseToken) {
-        headers['X-Purchase-Token'] = activePurchaseToken;
-      }
+    // Timeout guard: 15 seconds for AI generation (User request for Build 120)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-      const response = await fetch(`${backendUrl}/generate-ai-report`, {
-        method: 'POST',
-        headers: headers,
-        signal: controller.signal,
-        body: JSON.stringify({
-          category,
-          p1: inputs.p1, p2: inputs.p2,
-          u1: inputs.u1, u2: inputs.u2,
-          c1: inputs.c1, c2: inputs.c2,
-          r1: inputs.r1, r2: inputs.r2,
-          score: result.score,
-          status: result.status,
-          context: context || '',
-          device_id: currentDeviceId,
-          language: i18n.language || 'es',
-          detailed_analysis: true,
-          include_biases: true,
-          domain_context: category,
-          purchase_token: activePurchaseToken // Also include in body for redundancy
-        })
-      });
+    const headers: Record<string, string> = { 
+      'Content-Type': 'application/json' 
+    };
+    
+    if (activePurchaseToken) {
+      headers['X-Purchase-Token'] = activePurchaseToken;
+    }
+
+    const response = await fetch(`${backendUrl}/generate-ai-report`, {
+      method: 'POST',
+      headers: headers,
+      signal: controller.signal,
+      body: JSON.stringify({
+        category,
+        p1: inputs.p1, p2: inputs.p2,
+        u1: inputs.u1, u2: inputs.u2,
+        c1: inputs.c1, c2: inputs.c2,
+        r1: inputs.r1, r2: inputs.r2,
+        score: result.score,
+        status: result.status,
+        context: context || '',
+        device_id: currentDeviceId,
+        language: i18n.language || 'es',
+        detailed_analysis: true,
+        include_biases: true,
+        domain_context: category,
+        purchase_token: activePurchaseToken // Also include in body for redundancy
+      })
+    });
 
       clearTimeout(timeoutId);
 
