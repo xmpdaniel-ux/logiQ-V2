@@ -50,7 +50,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose }) => {
             <View style={styles.statusSection}>
               <View style={[styles.crownContainer, isActuallyPro ? styles.crownPro : styles.crownFree]}>
                 <MaterialCommunityIcons 
-                  name="crown" 
+                  name="diamond-stone" 
                   size={48} 
                   color={isActuallyPro ? "#F1C40F" : "#94A3B8"} 
                 />
@@ -85,7 +85,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose }) => {
                     setShowPaywall(true, 'manual');
                   }}
                 >
-                  <MaterialCommunityIcons name="crown" size={20} color="#FFFFFF" />
+                  <MaterialCommunityIcons name="diamond" size={20} color="#FFFFFF" />
                   <Text style={styles.upgradeButtonText}>{t('UPGRADE_TITLE') || 'Desbloquear Plan Pro'}</Text>
                 </TouchableOpacity>
               )}

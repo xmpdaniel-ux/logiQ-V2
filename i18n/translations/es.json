@@ -180,6 +180,7 @@
   "AI_LOADING_3": "Buscando el mejor camino...",
   "AI_LOADING_4": "Analizando perspectivas...",
   "REPORT_COPIED": "Informe copiado al portapapeles",
+  "MSG_COPY_ERROR": "No se pudo copiar el informe",
   "COPIED_TITLE": "Copiado",
   "COPIED_MESSAGE": "Reporte copiado al portapapeles.",
   "OK": "Aceptar",

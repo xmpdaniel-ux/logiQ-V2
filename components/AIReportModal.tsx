@@ -128,7 +128,7 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
       await Clipboard.setStringAsync(textToCopy);
       Alert.alert('✅', t('REPORT_COPIED'));
     } catch (error) {
-      Alert.alert('Error', 'No se pudo copiar el informe');
+      Alert.alert(t('ERROR') || 'Error', t('MSG_COPY_ERROR') || 'No se pudo copiar el informe');
     }
   };
 
