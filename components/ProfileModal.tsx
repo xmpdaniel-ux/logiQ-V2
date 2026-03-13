@@ -67,7 +67,27 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose }) => {
                 </View>
               )}
             </View>
-
+            {/* CTA Section */}
+            <View style={styles.ctaSection}>
+              {isActuallyPro ? (
+                <TouchableOpacity 
+                  style={styles.manageButton}
+                  onPress={() => Linking.openURL('https://play.google.com/store/account/subscriptions')}
+                >
+                  <Ionicons name="settings-outline" size={20} color="#334155" />
+                  <Text style={styles.manageButtonText}>{t('MANAGE_SUBSCRIPTION') || 'Gestionar Suscripción'}</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity 
+                  style={styles.upgradeButton}
+                  onPress={() => {
+                    onClose();
+                    setShowPaywall(true, 'manual');
+                  }}
+                >
+                  <MaterialCommunityIcons name="crown" size={20} color="#FFFFFF" />
+                  <Text style={styles.upgradeButtonText}>{t('UPGRADE_TITLE') || 'Desbloquear Plan Pro'}</Text>
+                </TouchableOpacity>
               )}
               
               <TouchableOpacity 
