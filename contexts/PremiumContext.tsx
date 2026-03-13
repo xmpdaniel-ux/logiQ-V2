@@ -16,7 +16,8 @@ const BACKEND_URL = 'https://logiq-production.up.railway.app';
 
 interface PremiumContextType {
   isPremium: boolean;
-  isPro: boolean; // Alias solicitado por el usuario
+  isPro: boolean; 
+  isOwner: boolean; // Bypass para el dueño
   reportCredits: number;
   chatCredits: number;
   deviceId: string;
@@ -159,6 +160,13 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
     } catch (err) {
       console.warn('IAP Initialization Error', err);
     }
+  };
+
+  // El ID del dueño para bypass en caso de errores de API
+  const OWNER_SUPPORT_ID = "gen_1768615120672_ugwvgzll0";
+
+  const isActuallyPremium = () => {
+    return isPremium || (supportId === OWNER_SUPPORT_ID);
   };
 
 
@@ -330,14 +338,14 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   const checkReportCredits = async (): Promise<boolean> => {
-    if (isPremium) return true;
+    if (isActuallyPremium()) return true;
     if (reportCredits > 0) return true;
     setShowPaywall(true, 'out_of_report_credits');
     return false;
   };
 
   const checkChatCredits = async (): Promise<boolean> => {
-    if (isPremium) return true;
+    if (isActuallyPremium()) return true;
     if (chatCredits > 0) return true;
     setShowPaywall(true, 'out_of_chat_credits');
     return false;
@@ -362,8 +370,9 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
   return (
     <PremiumContext.Provider
       value={{
-        isPremium,
-        isPro: isPremium,
+        isPremium: isActuallyPremium(),
+        isPro: isActuallyPremium(),
+        isOwner: supportId === OWNER_SUPPORT_ID,
         reportCredits,
         chatCredits,
         deviceId,

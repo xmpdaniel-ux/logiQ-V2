@@ -68,54 +68,25 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose }) => {
               )}
             </View>
 
-            {/* CTA Section */}
-            <View style={styles.ctaSection}>
-              {isActuallyPro ? (
-                <TouchableOpacity 
-                  style={styles.manageButton}
-                  onPress={() => Linking.openURL('https://play.google.com/store/account/subscriptions')}
-                >
-                  <Ionicons name="settings-outline" size={20} color="#334155" />
-                  <Text style={styles.manageButtonText}>{t('MANAGE_SUBSCRIPTION') || 'Gestionar Suscripción'}</Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity 
-                  style={styles.upgradeButton}
-                  onPress={() => {
-                    onClose();
-                    setShowPaywall(true, 'manual');
-                  }}
-                >
-                  <MaterialCommunityIcons name="crown" size={20} color="#FFFFFF" />
-                  <Text style={styles.upgradeButtonText}>{t('UPGRADE_TITLE') || 'Desbloquear Plan Pro'}</Text>
-                </TouchableOpacity>
               )}
+              
+              <TouchableOpacity 
+                style={styles.legalButtonSutilCTA}
+                onPress={handleOpenLegal}
+              >
+                <Text style={styles.legalButtonTextSutil}>{t('BTN_TERMS_SERVICE') || 'Términos del Servicio'}</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Support ID / Legal Section */}
             <View style={styles.supportContainer}>
               <Text style={styles.supportIdText}>Support ID: {supportId || 'N/A'}</Text>
               
-              <TouchableOpacity 
-                style={styles.legalButtonSutil}
-                onPress={handleOpenLegal}
-              >
-                <Text style={styles.legalButtonTextSutil}>{t('BTN_TERMS_SERVICE') || 'Términos del Servicio'}</Text>
-              </TouchableOpacity>
-              
               <Text style={styles.supportFooterText}>
                 {t('MODAL_SUPPORT_FOOTER')}
               </Text>
             </View>
 
-            {/* Legal Section */}
-            <View style={styles.legalSection}>
-              <TouchableOpacity style={styles.legalButton} onPress={handleOpenLegal}>
-                <Ionicons name="document-text-outline" size={22} color="#3498DB" />
-                <Text style={styles.legalButtonText}>{t('MODAL_LEGAL_TERMS')}</Text>
-                <Ionicons name="chevron-forward" size={18} color="#CBD5E1" />
-              </TouchableOpacity>
-            </View>
           </ScrollView>
         </View>
       </View>
@@ -278,6 +249,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#334155',
     marginLeft: 12,
+  },
+  legalButtonSutilCTA: {
+    alignSelf: 'center',
+    marginTop: 12,
+    padding: 8,
   },
   supportContainer: {
     alignItems: 'center',
