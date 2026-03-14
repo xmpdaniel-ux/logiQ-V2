@@ -62,14 +62,14 @@ export const saveDecision = async (decision: Decision): Promise<void> => {
   try {
     const existingHistory = await getHistory();
 
-    // Bloqueo para evitar doble guardado (verificar si el ID ya existe)
-    const alreadyExists = existingHistory.some(d => d.id === decision.id);
-    if (alreadyExists) {
-      console.log(`Decision with ID ${decision.id} already exists. Skipping save.`);
-      return;
+    const existingIndex = existingHistory.findIndex(d => d.id === decision.id);
+    let updatedHistory;
+    if (existingIndex >= 0) {
+      updatedHistory = [...existingHistory];
+      updatedHistory[existingIndex] = decision;
+    } else {
+      updatedHistory = [decision, ...existingHistory];
     }
-
-    const updatedHistory = [decision, ...existingHistory];
     await storageSet(HISTORY_KEY, JSON.stringify(updatedHistory));
   } catch (error) {
     console.error('Error saving decision:', error);

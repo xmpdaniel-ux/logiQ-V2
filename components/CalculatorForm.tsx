@@ -38,7 +38,8 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     checkChatCredits,
     handlePurchaseSuccess,
     refreshUserStatus,
-    activePurchaseToken
+    activePurchaseToken,
+    activeProductId
   } = usePremium();
   const insets = useSafeAreaInsets();
 
@@ -305,7 +306,8 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         detailed_analysis: true,
         include_biases: true,
         domain_context: category,
-        purchase_token: activePurchaseToken // Also include in body for redundancy
+        purchase_token: activePurchaseToken, // Also include in body for redundancy
+        product_id: activeProductId
       })
     });
 
@@ -437,8 +439,8 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
           style={styles.proActiveBanner}
           onPress={() => setShowProfileModal(true)}
         >
-          <MaterialCommunityIcons name="crown" size={20} color="#F1C40F" />
-          <Text style={styles.proActiveBannerText}>{t('BTN_PROFILE_PRO') || 'Perfil Pro'}</Text>
+          <MaterialCommunityIcons name="diamond" size={20} color="#F1C40F" />
+          <Text style={styles.proActiveBannerText}>{t('BTN_PROFILE_PRO') || 'Estado: Premium'}</Text>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
@@ -446,7 +448,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
           onPress={() => setShowProfileModal(true)}
         >
           <View style={styles.premiumBannerLeft}>
-            <MaterialCommunityIcons name="crown" size={20} color="#F1C40F" />
+            <MaterialCommunityIcons name="diamond" size={20} color="#BDC3C7" />
             <Text style={styles.premiumBannerTitle}>
               {t('BTN_PROFILE_FREE', { count: reportCredits + chatCredits }) || `Perfil · ${reportCredits + chatCredits} Pruebas Gratis`}
             </Text>

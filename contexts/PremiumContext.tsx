@@ -31,9 +31,10 @@ interface PremiumContextType {
   checkChatCredits: () => Promise<boolean>;
   refreshUserStatus: () => Promise<void>;
   handlePurchaseSuccess: () => void;
-  getDeviceId: () => string;
+  getDeviceId: () => string | null;
   activePurchaseToken: string | null;
-  requestPurchase: (sku: string, params: { offerToken?: string, basePlanId?: string }) => Promise<void>;
+  activeProductId: string | null;
+  requestPurchase: (sku: string, params?: { offerToken?: string, basePlanId?: string }) => Promise<void>;
 }
 
 const PremiumContext = createContext<PremiumContextType | undefined>(undefined);
@@ -78,6 +79,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [deviceId, setDeviceId] = useState('');
   const [supportId, setSupportId] = useState('');
   const [activePurchaseToken, setActivePurchaseToken] = useState<string | null>(null);
+  const [activeProductId, setActiveProductId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showPaywall, setShowPaywallState] = useState(false);
   const [paywallTrigger, setPaywallTrigger] = useState<'out_of_report_credits' | 'out_of_chat_credits' | 'manual'>('manual');
@@ -151,6 +153,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
             }).then(resp => {
               clearTimeout(timeoutId);
               if (purchase.purchaseToken) setActivePurchaseToken(purchase.purchaseToken);
+              setActiveProductId(idToSend);
               if (!resp.ok) console.warn('Background verification failed, but user has local access');
             }).catch(e => {
               clearTimeout(timeoutId);
@@ -213,6 +216,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
             const matchedId = activePurchase.productIds.find((id: string) => VALID_SKUS.includes(id));
             if (matchedId) idToSend = matchedId;
           }
+          setActiveProductId(idToSend);
 
           fetch(`${BACKEND_URL}/api/verify-purchase`, {
             method: 'POST',
@@ -410,6 +414,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
         handlePurchaseSuccess,
         getDeviceId,
         activePurchaseToken,
+        activeProductId,
         requestPurchase,
       }}
     >

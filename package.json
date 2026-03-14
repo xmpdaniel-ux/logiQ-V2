@@ -1,8 +1,8 @@
 {
   "name": "logiq-v2",
   "main": "expo-router/entry",
-  "version": "2.0.4.8",
-  "buildVersion": "153",
+  "version": "2.0.4.9",
+  "buildVersion": "155",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
