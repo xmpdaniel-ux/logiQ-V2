@@ -13,6 +13,7 @@ interface AIReportModalProps {
   onClose: () => void;
   onSaveWithReport?: () => void;
   onOpenChat?: () => void;
+  onReportError?: () => void;
   category?: string;
 }
 
@@ -87,6 +88,7 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
   onClose,
   onSaveWithReport,
   onOpenChat,
+  onReportError,
   category
 }) => {
   const { t } = useTranslation();
@@ -181,9 +183,19 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
 
             {error && (
               <View style={styles.errorContainer}>
-                <Ionicons name="alert-circle" size={48} color="#E74C3C" />
+                <Ionicons name={error === t('ERROR_NO_INTERNET') ? "wifi" : "alert-circle"} size={48} color="#E74C3C" />
                 <Text style={styles.errorTitle}>{t('AI_ERROR')}</Text>
-                <Text style={styles.errorText}>{t('AI_ERROR_MSG')}</Text>
+                <Text style={styles.errorText}>{error}</Text>
+                
+                {onReportError && error !== t('ERROR_NO_INTERNET') && (
+                  <TouchableOpacity 
+                    style={styles.reportButton}
+                    onPress={onReportError}
+                  >
+                    <Ionicons name="bug" size={18} color="#FFFFFF" />
+                    <Text style={styles.reportButtonText}>{t('BTN_REPORT_ISSUE') || 'Informar Problema'}</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
 
@@ -350,6 +362,7 @@ const styles = StyleSheet.create({
   errorContainer: {
     alignItems: 'center',
     paddingVertical: 32,
+    paddingHorizontal: 20,
   },
   errorTitle: {
     fontSize: 20,
@@ -362,6 +375,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#7F8C8D',
     textAlign: 'center',
+    marginBottom: 16,
+  },
+  reportButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E74C3C',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+    marginTop: 10,
+  },
+  reportButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   reportContainer: {
     paddingVertical: 8,

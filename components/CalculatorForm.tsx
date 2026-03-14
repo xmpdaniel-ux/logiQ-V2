@@ -14,6 +14,7 @@ import AIChatModal from './AIChatModal';
 import SubscriptionPaywall from './SubscriptionPaywall';
 import ProfileModal from './ProfileModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import * as StoreReview from 'expo-store-review';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
@@ -68,6 +69,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
   const [aiError, setAiError] = useState<string | null>(null);
   const [chatModalVisible, setChatModalVisible] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [fullErrorLog, setFullErrorLog] = useState<string>('');
 
   // Función para obtener deviceId garantizado
   const getDeviceId = async (): Promise<string> => {
@@ -116,7 +118,34 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         console.warn('Cloud save failed (non-critical):', response.status);
       }
     } catch (error) {
-      console.warn('Error saving to cloud (non-critical):', error);
+      console.error('Error in background sync loop (decision):', error);
+    }
+  };
+
+  const handleReportIssue = async () => {
+    try {
+      const currentDeviceId = await getDeviceId();
+      const payload = {
+        device_id: currentDeviceId,
+        product_id: activeProductId || 'Free/Unknown',
+        platform: Platform.OS,
+        app_version: Constants.expoConfig?.version || 'Unknown',
+        error_message: fullErrorLog,
+        category: category
+      };
+      
+      const backendUrl = 'https://logiq-production.up.railway.app/api';
+      await fetch(`${backendUrl}/report-error`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      Alert.alert('✅', t('MSG_ISSUE_REPORTED'));
+      setAiModalVisible(false);
+    } catch (e) {
+      console.warn('Could not send telemetry', e);
+      Alert.alert(t('ERROR'), 'No hemos podido enviar el reporte por un problema de conexión.');
     }
   };
 
@@ -350,12 +379,35 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
       }
     } catch (error: any) {
       console.error('AI Report Error:', error);
-      const errorMessage = error.name === 'AbortError'
-        ? "El servidor está tardando demasiado. Por favor, revisa tu internet o intenta de nuevo."
-        : (error instanceof Error ? error.message : t('MSG_CONNECTION_ERROR'));
+      
+      let errorMessage = t('MSG_CONNECTION_ERROR');
+      let isNetworkError = false;
 
-      Alert.alert(t('ERROR'), errorMessage);
-      setAiError(t('MSG_AI_ERROR') + ': ' + errorMessage);
+      const errMessageStr = (error instanceof Error) ? error.message : String(error);
+
+      if (error?.name === 'AbortError') {
+        errorMessage = "El servidor está tardando demasiado. Por favor, revisa tu internet o intenta de nuevo.";
+        isNetworkError = true;
+      } else if (error instanceof TypeError && (errMessageStr.includes('Failed to fetch') || errMessageStr.includes('Network request failed'))) {
+        errorMessage = t('ERROR_NO_INTERNET');
+        isNetworkError = true;
+      } else if (errMessageStr.includes('Failed to fetch') || errMessageStr.includes('Network request failed')) {
+        errorMessage = t('ERROR_NO_INTERNET');
+        isNetworkError = true;
+      } else {
+        errorMessage = errMessageStr;
+      }
+
+      const errorTrace = error instanceof Error ? `${error.name}: ${error.message}\n${error.stack}` : String(error);
+      setFullErrorLog(errorTrace);
+
+      if (isNetworkError) {
+        Alert.alert(t('ERROR'), errorMessage);
+        setAiError(t('ERROR_NO_INTERNET'));
+      } else {
+        Alert.alert(t('ERROR'), errorMessage);
+        setAiError(t('ERROR_GENERIC_REPORT') + '\n\nDetalle técnico: ' + errorMessage);
+      }
     } finally {
       setAiLoading(false);
     }
@@ -574,6 +626,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
           setAiModalVisible(false);
           setChatModalVisible(true);
         }}
+        onReportError={isPremium ? handleReportIssue : undefined}
         category={category}
       />
       <AIChatModal
