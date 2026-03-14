@@ -217,8 +217,11 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
     try {
       console.log('Restoring purchases...');
       const availablePurchases = await IAP.getAvailablePurchases();
-
-      const hasActivePurchase = availablePurchases.some(p => p.productId === PRODUCT_ID);
+      const VALID_SKUS = [PRODUCT_ID, PLAN_IDS.MONTHLY, PLAN_IDS.QUARTERLY, PLAN_IDS.ANNUAL];
+      const hasActivePurchase = availablePurchases.some(p => 
+        VALID_SKUS.includes(p.productId) || 
+        (p.productIds && p.productIds.some((id: string) => VALID_SKUS.includes(id)))
+      );
 
       if (hasActivePurchase) {
         Alert.alert(

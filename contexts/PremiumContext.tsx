@@ -130,6 +130,14 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000);
 
+            // Determinar qué ID enviar
+            const VALID_SKUS = ['logiq_premium_monthly', 'logiq-monthly-v2', 'logiq-quarterly-v2', 'logiq-annual-v2'];
+            let idToSend = purchase.productId;
+            if (purchase.productIds && Array.isArray(purchase.productIds)) {
+              const matchedId = purchase.productIds.find((id: string) => VALID_SKUS.includes(id));
+              if (matchedId) idToSend = matchedId;
+            }
+
             fetch(`${BACKEND_URL}/api/verify-purchase`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -137,7 +145,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
               body: JSON.stringify({
                 device_id: deviceId,
                 purchase_token: purchase.purchaseToken,
-                product_id: purchase.productId,
+                product_id: idToSend,
                 hardware_fingerprint: null
               })
             }).then(resp => {
@@ -175,14 +183,18 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const validateProStatus = async () => {
     try {
-      const purchases = await IAP.getAvailablePurchases();
-      // We check for any of our known substrings in the productIds
-      const activePurchase = purchases.find(p =>
-        p.productId.includes('monthly') ||
-        p.productId.includes('quarterly') ||
-        p.productId.includes('annual') ||
-        p.productId === 'logiq_premium_monthly'
-      );
+      const VALID_SKUS = ['logiq_premium_monthly', 'logiq-monthly-v2', 'logiq-quarterly-v2', 'logiq-annual-v2'];
+
+      // We check for any of our known substrings or exact matches in the productIds
+      const activePurchase = purchases.find(p => {
+        const pId = p.productId || '';
+        const pIds = p.productIds || [];
+        return VALID_SKUS.includes(pId) || 
+               (Array.isArray(pIds) && pIds.some(id => VALID_SKUS.includes(id))) ||
+               pId.includes('monthly') || 
+               pId.includes('quarterly') || 
+               pId.includes('annual');
+      });
 
       if (activePurchase) {
         setIsPremium(true);
@@ -196,6 +208,12 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 8000);
           const currentId = await getOrCreateDeviceId();
+          let idToSend = activePurchase.productId;
+          if (activePurchase.productIds && Array.isArray(activePurchase.productIds)) {
+            const matchedId = activePurchase.productIds.find((id: string) => VALID_SKUS.includes(id));
+            if (matchedId) idToSend = matchedId;
+          }
+
           fetch(`${BACKEND_URL}/api/verify-purchase`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -203,7 +221,7 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
             body: JSON.stringify({
               device_id: currentId,
               purchase_token: activePurchase.purchaseToken,
-              product_id: activePurchase.productId,
+              product_id: idToSend,
               hardware_fingerprint: null
             })
           }).catch(e => console.warn('Silent sync failed', e));
