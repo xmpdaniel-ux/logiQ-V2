@@ -61,6 +61,8 @@
   "BTN_CLEAR_ALL": "Clear All",
   "BTN_PROFILE_PRO": "Status: Premium",
   "BTN_PROFILE_FREE": "Basic Profile",
+  "BANNER_FREE_TITLE": "Unlock LogiQ Pro",
+  "BANNER_FREE_SUBTITLE": "{{report}} Reports + {{chat}} Inquiries",
   "MODAL_PROFILE_TITLE": "My Profile",
   "MODAL_LEGAL_TERMS": "Terms of Service",
   "MODAL_SUPPORT_FOOTER": "To request data deletion, identify with the Support ID or use 'Clear All' in History.",

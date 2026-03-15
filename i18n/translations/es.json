@@ -61,6 +61,8 @@
   "BTN_CLEAR_ALL": "Borrar Todo",
   "BTN_PROFILE_PRO": "Estado: Premium",
   "BTN_PROFILE_FREE": "Perfil Básico",
+  "BANNER_FREE_TITLE": "Desbloquea LogiQ Pro",
+  "BANNER_FREE_SUBTITLE": "{{report}} Reportes + {{chat}} Consultas",
   "MODAL_PROFILE_TITLE": "Mi Perfil",
   "MODAL_LEGAL_TERMS": "Términos del Servicio",
   "MODAL_SUPPORT_FOOTER": "Para solicitar el borrado de sus datos, identifíquese con su Support ID anterior o use el botón 'Borrar Todo' en su Historial.",

@@ -505,10 +505,18 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
           onPress={() => setShowProfileModal(true)}
         >
           <View style={styles.premiumBannerLeft}>
-            <MaterialCommunityIcons name="diamond" size={20} color="#BDC3C7" />
-            <Text style={styles.premiumBannerTitle}>
-              {t('BTN_PROFILE_FREE') || 'Perfil Básico'}
+            <View style={styles.premiumBannerTitleRow}>
+              <MaterialCommunityIcons name="diamond" size={20} color="#BDC3C7" />
+              <Text style={styles.premiumBannerTitle}>
+                {t('BANNER_FREE_TITLE') || 'Desbloquea LogiQ Pro'}
+              </Text>
+            </View>
+            <Text style={styles.premiumBannerSubtitle}>
+               {t('BANNER_FREE_SUBTITLE', { report: reportCredits, chat: chatCredits }) || `${reportCredits} Reportes + ${chatCredits} Consultas`}
             </Text>
+          </View>
+          <View style={[styles.creditBadgeInline, (reportCredits === 0 && chatCredits === 0) && styles.creditBadgeEmpty]}>
+            <Text style={styles.creditBadgeText}>{reportCredits + chatCredits}</Text>
           </View>
         </TouchableOpacity>
       )}
@@ -866,10 +874,13 @@ const styles = StyleSheet.create({
     borderColor: '#1ABC9C',
   },
   premiumBannerLeft: {
+    flex: 1,
+  },
+  premiumBannerTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    gap: 12,
+    marginBottom: 2,
+    gap: 8,
   },
   premiumBannerText: {
     flex: 1,
