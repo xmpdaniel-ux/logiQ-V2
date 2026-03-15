@@ -353,6 +353,11 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
       }
 
       if (!response.ok) {
+        if (response.status === 402) {
+          setAiModalVisible(false);
+          setShowPaywall(true, 'out_of_report_credits');
+          return;
+        }
         if (response.status === 404) throw new Error("Servidor no responde (404). Revisa tu conexión.");
         if (response.status >= 500) throw new Error("Error interno del servidor. Inténtalo de nuevo más tarde.");
         throw new Error(`${t('ERROR')} ${response.status}`);
