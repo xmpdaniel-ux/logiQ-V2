@@ -60,7 +60,7 @@
   "BTN_SEND": "Send",
   "BTN_CLEAR_ALL": "Clear All",
   "BTN_PROFILE_PRO": "Status: Premium",
-  "BTN_PROFILE_FREE": "Basic Profile : {{count}} credits",
+  "BTN_PROFILE_FREE": "Basic Profile",
   "MODAL_PROFILE_TITLE": "My Profile",
   "MODAL_LEGAL_TERMS": "Terms of Service",
   "MODAL_SUPPORT_FOOTER": "To request data deletion, identify with the Support ID or use 'Clear All' in History.",

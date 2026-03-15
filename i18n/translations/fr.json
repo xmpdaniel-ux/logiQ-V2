@@ -65,7 +65,7 @@
   "BTN_SEND": "Envoyer",
   "BTN_CLEAR_ALL": "Tout Effacer",
   "BTN_PROFILE_PRO": "Statut : Premium",
-  "BTN_PROFILE_FREE": "Profil de base : {{count}} crédits",
+  "BTN_PROFILE_FREE": "Profil de base",
   "MODAL_PROFILE_TITLE": "Mon Profil",
   "MODAL_LEGAL_TERMS": "Conditions d'Utilisation",
   "MODAL_SUPPORT_FOOTER": "Pour demander la suppression des données, identifiez-vous avec l'ID de support ou utilisez 'Tout Effacer'.",

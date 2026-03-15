@@ -507,11 +507,8 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
           <View style={styles.premiumBannerLeft}>
             <MaterialCommunityIcons name="diamond" size={20} color="#BDC3C7" />
             <Text style={styles.premiumBannerTitle}>
-              {t('BTN_PROFILE_FREE', { count: reportCredits + chatCredits }) || `Perfil · ${reportCredits + chatCredits} Pruebas Gratis`}
+              {t('BTN_PROFILE_FREE') || 'Perfil Básico'}
             </Text>
-          </View>
-          <View style={[styles.creditBadgeInline, (reportCredits === 0 && chatCredits === 0) && styles.creditBadgeEmpty]}>
-            <Text style={styles.creditBadgeText}>{reportCredits + chatCredits}</Text>
           </View>
         </TouchableOpacity>
       )}

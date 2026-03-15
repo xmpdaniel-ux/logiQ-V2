@@ -60,7 +60,7 @@
   "BTN_SEND": "Enviar",
   "BTN_CLEAR_ALL": "Limpar Tudo",
   "BTN_PROFILE_PRO": "Status: Premium",
-  "BTN_PROFILE_FREE": "Perfil Básico : {{count}} créditos",
+  "BTN_PROFILE_FREE": "Perfil Básico",
   "MODAL_PROFILE_TITLE": "Meu Perfil",
   "MODAL_LEGAL_TERMS": "Termos de Serviço",
   "MODAL_SUPPORT_FOOTER": "Para solicitar a exclusão de dados, identifique-se com o Support ID ou use 'Limpar Tudo' no Histórico.",

@@ -193,14 +193,12 @@ async def verify_subscription_purchase(purchase_token: str, product_id: str):
 
         data = resp.json()
 
-        subscription_state = int(data.get("subscriptionState", 0))
-        if subscription_state != 1:
-            return False, None, f"Subscription state is {subscription_state} (not active)"
-
         expiry_ms_str = data.get("expiryTimeMillis", "0")
         try:
             expiry_ms = int(expiry_ms_str)
             expiry_date = datetime.fromtimestamp(expiry_ms / 1000.0)
+            if expiry_date < datetime.utcnow():
+                return False, None, "Subscription expired"
         except (ValueError, TypeError):
             return False, None, "Invalid expiryTimeMillis format"
 
@@ -243,6 +241,8 @@ class FDUReportRequest(BaseModel):
     device_id: str = ""
     hardware_fingerprint: Optional[str] = None
     language: str = "es"
+    purchase_token: Optional[str] = None
+    product_id: Optional[str] = None
 
     class Config:
         extra = "ignore"
@@ -255,6 +255,8 @@ class AIFollowupRequest(BaseModel):
     hardware_fingerprint: Optional[str] = None
     language: str = "es"
     session_id: Optional[str] = None
+    purchase_token: Optional[str] = None
+    product_id: Optional[str] = None
 
     class Config:
         extra = "ignore"
@@ -544,6 +546,22 @@ async def generate_ai_report(request: FDUReportRequest, background_tasks: Backgr
 
     is_premium = await is_user_premium_active(unique_key)
 
+    if not is_premium and request.purchase_token and request.product_id:
+        is_active, expiry_date, _ = await verify_subscription_purchase(request.purchase_token, request.product_id)
+        if is_active:
+            is_premium = True
+            await db['users'].update_one(
+                {"unique_key": unique_key},
+                {
+                    "$set": {
+                        "is_premium": True,
+                        "premium_expires": expiry_date,
+                        "purchase_token": request.purchase_token,
+                        "product_id": request.product_id
+                    }
+                }
+            )
+
     if not is_premium:
         if user.get('report_credits', 0) <= 0:
             raise HTTPException(status_code=402, detail="Payment required - no credits and not premium")
@@ -690,6 +708,22 @@ async def ai_followup(request: AIFollowupRequest, background_tasks: BackgroundTa
     unique_key = user['unique_key']
 
     is_premium = await is_user_premium_active(unique_key)
+
+    if not is_premium and getattr(request, 'purchase_token', None) and getattr(request, 'product_id', None):
+        is_active, expiry_date, _ = await verify_subscription_purchase(request.purchase_token, request.product_id)
+        if is_active:
+            is_premium = True
+            await db['users'].update_one(
+                {"unique_key": unique_key},
+                {
+                    "$set": {
+                        "is_premium": True,
+                        "premium_expires": expiry_date,
+                        "purchase_token": request.purchase_token,
+                        "product_id": request.product_id
+                    }
+                }
+            )
 
     if not is_premium:
         if user.get('chat_credits', 0) <= 0:
