@@ -153,7 +153,20 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     try {
       const calculatedResult = calculateFDU(inputs);
       setResult(calculatedResult);
-      setCurrentSessionId(Date.now().toString());
+      const sharedId = currentSessionId || Date.now().toString();
+      setCurrentSessionId(sharedId);
+
+      // Auto-guardado silencioso inicial (sobreescribe si existe)
+      const decision: Decision = {
+        id: sharedId,
+        category,
+        date: new Date().toISOString(),
+        inputs,
+        result: calculatedResult,
+        context: context || undefined,
+        ai_report: aiReport || undefined,
+      };
+      saveDecision(decision).catch(e => console.warn('Silent save error', e));
 
       setTimeout(() => {
         if (Platform.OS === 'web') {
@@ -210,6 +223,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         inputs,
         result: finalResult,
         context: context || undefined,
+        ai_report: aiReport || undefined, // Evitar pérdida de reporte si guardan manualmente después
       };
 
       // 1. Guardado local
@@ -223,7 +237,7 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         inputs,
         result: finalResult,
         context: context || '',
-        ai_report: ''
+        ai_report: aiReport || ''
       });
 
       if (Platform.OS === 'web') {
@@ -379,6 +393,35 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
 
         setAiReport(data.report);
         await refreshUserStatus();
+        
+        // Auto-guardado silencioso del reporte 
+        try {
+          const currentDeviceId = await getDeviceId();
+          const sharedId = currentSessionId || Date.now().toString();
+          if (!currentSessionId) setCurrentSessionId(sharedId);
+          
+          const decision: Decision = {
+            id: sharedId,
+            category,
+            date: new Date().toISOString(),
+            inputs,
+            result: result, 
+            ai_report: data.report,
+            context: context || undefined,
+          };
+          await saveDecision(decision);
+          
+          saveToCloud({
+            id: sharedId,
+            device_id: currentDeviceId,
+            category,
+            inputs,
+            result: result,
+            context: context || '',
+            ai_report: data.report
+          }).catch(e => console.warn('Silent cloud sync failed', e));
+        } catch(e) { console.warn('Autosave error', e) }
+
       } else {
         throw new Error(t('MSG_NO_REPORT'));
       }

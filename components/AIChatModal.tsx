@@ -186,7 +186,8 @@ const AIChatModal: React.FC<AIChatModalProps> = ({
     >
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
       >
         <View style={styles.modalContent}>
           {/* Header */}
