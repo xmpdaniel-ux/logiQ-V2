@@ -251,18 +251,7 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
                   onPress={handleOpenChat}
                 >
                   <Ionicons name="chatbubbles" size={20} color="#FFFFFF" />
-                  <Text style={styles.chatButtonText}>{t('BTN_CONTINUE_CHAT')}</Text>
-                </TouchableOpacity>
-              )}
-
-              {/* Save Button - Solo Premium */}
-              {isPremium && onSaveWithReport && (
-                <TouchableOpacity
-                  style={styles.saveWithReportButton}
-                  onPress={handleSaveWithReport}
-                >
-                  <Ionicons name="save" size={20} color="#FFFFFF" />
-                  <Text style={styles.saveWithReportButtonText}>{t('BTN_SAVE_REPORT')}</Text>
+                  <Text style={styles.chatButtonText}>{t('BTN_ENTER_CHAT') || 'Entrar al Chat IA'}</Text>
                 </TouchableOpacity>
               )}
             </View>

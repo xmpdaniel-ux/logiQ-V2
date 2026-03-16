@@ -168,22 +168,6 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
       };
       saveDecision(decision).catch(e => console.warn('Silent save error', e));
 
-      setTimeout(() => {
-        if (Platform.OS === 'web') {
-          if (window.confirm(`${t('REMINDER_TITLE')}\n\n${t('REMINDER_SAVE_MSG')}`)) {
-            handleSave(calculatedResult);
-          }
-        } else {
-          Alert.alert(
-            t('REMINDER_TITLE'),
-            t('REMINDER_SAVE_MSG'),
-            [
-              { text: t('BTN_LATER'), style: 'cancel' },
-              { text: t('BTN_SAVE_NOW'), style: 'default', onPress: () => handleSave(calculatedResult) },
-            ]
-          );
-        }
-      }, 600);
     } catch (error) {
       console.error('Error calculating FDU:', error);
       Alert.alert(t('ERROR'), t('MSG_CALCULATION_ERROR'));
@@ -197,64 +181,6 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     setResult(null);
     setContext('');
     setCurrentSessionId(null);
-  };
-
-  const handleSave = async (resultOverride?: FDUResult) => {
-    const finalResult = resultOverride || result;
-    if (!finalResult) {
-      if (Platform.OS === 'web') {
-        window.alert(t('MSG_CALCULATE_FIRST'));
-      } else {
-        Alert.alert(t('ERROR'), t('MSG_CALCULATE_FIRST'));
-      }
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const currentDeviceId = await getDeviceId();
-      const sharedId = currentSessionId || Date.now().toString(); // Usar ID de sesión existente
-      if (!currentSessionId) setCurrentSessionId(sharedId);
-
-      const decision: Decision = {
-        id: sharedId,
-        category,
-        date: new Date().toISOString(),
-        inputs,
-        result: finalResult,
-        context: context || undefined,
-        ai_report: aiReport || undefined, // Evitar pérdida de reporte si guardan manualmente después
-      };
-
-      // 1. Guardado local
-      await saveDecision(decision);
-
-      // 2. Guardado en nube (Sincronizado)
-      await saveToCloud({
-        id: sharedId,
-        device_id: currentDeviceId,
-        category,
-        inputs,
-        result: finalResult,
-        context: context || '',
-        ai_report: aiReport || ''
-      });
-
-      if (Platform.OS === 'web') {
-        window.alert(t('MSG_SAVED_SUCCESS'));
-      } else {
-        Alert.alert(t('SUCCESS'), t('MSG_SAVED_SUCCESS'));
-      }
-    } catch (error) {
-      console.error('Error saving:', error);
-      if (Platform.OS === 'web') {
-        window.alert(t('MSG_SAVE_ERROR'));
-      } else {
-        Alert.alert(t('ERROR'), t('MSG_SAVE_ERROR'));
-      }
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   const handleSaveWithAIReport = async () => {
@@ -635,21 +561,6 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
 
 
           <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity
-              style={[styles.saveButton, isSaving && { opacity: 0.7 }]}
-              onPress={() => handleSave()}
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <>
-                  <Ionicons name="save" size={20} color="#FFFFFF" style={styles.buttonIcon} />
-                  <Text style={styles.buttonText}>{t('BTN_SAVE')}</Text>
-                </>
-              )}
-            </TouchableOpacity>
-
             <TouchableOpacity
               style={[styles.aiButton, aiLoading && { opacity: 0.7 }]}
               onPress={handleGenerateAIReport}
