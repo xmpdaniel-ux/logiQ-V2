@@ -120,6 +120,18 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
     }
   }, [visible]);
 
+  // Auto-close Paywall if isPremium becomes true in the background
+  // (e.g. late validation from PremiumContext)
+  useEffect(() => {
+    if (visible && isPremium) {
+      Alert.alert(
+        t('SUCCESS_TITLE') || '✅ Premium Detectado',
+        'Tu suscripción fue verificada. Ya puedes utilizar todas las funciones Pro.'
+      );
+      onClose();
+    }
+  }, [visible, isPremium]);
+
   const getPriceForPlan = (planId: string) => {
     const subAny = subscriptions.find(s => s.productId === PRODUCT_ID) as any;
     if (!subAny) return 'N/A';
@@ -228,7 +240,13 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
           t('SUCCESS_TITLE') || '✅ Success',
           t('RESTORE_SUCCESS_MESSAGE') || 'Tus suscripciones han sido restauradas.'
         );
-        // handlePurchaseSuccess se encargará de actualizar el estado global si es necesario
+        import('../contexts/PremiumContext').then(({ usePremium }) => {
+           // Si tenemos acceso al contexto o necesitamos re-ejecutar,
+           // pero requestPurchase_ o fetch en background lo hará. Mejor disparamos el success callback
+        });
+        if (onPurchaseSuccess) {
+            onPurchaseSuccess();
+        }
       } else {
         Alert.alert(
           t('RESTORE_EMPTY_TITLE') || 'Aviso',
@@ -273,50 +291,6 @@ const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({
             >
               <Text style={styles.retryButtonText}>{t('PAYWALL_TRY_AGAIN')}</Text>
             </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    );
-  }
-
-  // Already Subscribed State
-  if (isPremium) {
-    const manageSubsUrl = `https://play.google.com/store/account/subscriptions?sku=${PRODUCT_ID}&package=com.logiq.app.pro`;
-    return (
-      <Modal visible={visible} animationType="slide" transparent>
-        <View style={styles.overlay}>
-          <View style={[styles.container, { paddingBottom: insets.bottom + 20 }]}>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Ionicons name="close" size={28} color="#7F8C8D" />
-            </TouchableOpacity>
-
-            <View style={{ alignItems: 'center', paddingHorizontal: 24, paddingTop: 24 }}>
-              <View style={[styles.iconContainer, { backgroundColor: '#E8F8F5' }]}>
-                <MaterialCommunityIcons name="crown" size={48} color="#F1C40F" />
-              </View>
-              <Text style={[styles.title, { marginTop: 12 }]}>{t('PAYWALL_ALREADY_PRO') || '¡Eres Premium! 🎉'}</Text>
-              <Text style={[styles.subtitle, { marginTop: 8, marginBottom: 24 }]}>
-                {t('PAYWALL_ALREADY_PRO_DESC') || 'Tu suscripción a LogiQ está activa. Puedes gestionar o cambiar de plan en Google Play.'}
-              </Text>
-
-              <TouchableOpacity
-                style={[styles.purchaseButton, { backgroundColor: '#2ECC71' }]}
-                onPress={() => Linking.openURL(manageSubsUrl)}
-              >
-                <Ionicons name="settings-outline" size={20} color="#FFF" />
-                <Text style={[styles.purchaseButtonText, { marginLeft: 8 }]}>{t('MANAGE_SUBSCRIPTION') || 'Gestionar suscripción'}</Text>
-              </TouchableOpacity>
-
-
-              <TouchableOpacity onPress={onClose} style={[styles.laterButton, { marginTop: 10 }]}>
-                <Text style={styles.laterText}>{t('PAYWALL_CLOSE') || 'Cerrar'}</Text>
-              </TouchableOpacity>
-
-              <Text style={{ fontSize: 10, color: '#BDC3C7', marginTop: 24, textAlign: 'center' }}>
-                Support ID: {supportId || 'N/A'}{'\n'}
-                Use this ID for data deletion requests
-              </Text>
-            </View>
           </View>
         </View>
       </Modal>
