@@ -183,50 +183,6 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
     setCurrentSessionId(null);
   };
 
-  const handleSaveWithAIReport = async () => {
-    if (!result || !aiReport) {
-      Alert.alert(t('ERROR'), t('MSG_NEED_RESULT_AND_REPORT'));
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const currentDeviceId = await getDeviceId();
-      const sharedId = currentSessionId || Date.now().toString();
-      if (!currentSessionId) setCurrentSessionId(sharedId);
-
-      const decision: Decision = {
-        id: sharedId,
-        category,
-        date: new Date().toISOString(),
-        inputs,
-        result,
-        ai_report: aiReport,
-        context: context || undefined,
-      };
-
-      await saveDecision(decision);
-
-      await saveToCloud({
-        id: sharedId,
-        device_id: currentDeviceId,
-        category,
-        inputs,
-        result,
-        context: context || '',
-        ai_report: aiReport
-      });
-
-      Alert.alert('✅ ' + t('SUCCESS'), t('MSG_SAVED_WITH_AI'));
-      setAiModalVisible(false);
-    } catch (error) {
-      console.error('Error saving with AI report:', error);
-      Alert.alert(t('ERROR'), t('MSG_SAVE_ERROR'));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const handleGenerateAIReport = async () => {
     if (!result) {
       Alert.alert(t('ERROR'), t('MSG_CALCULATE_FIRST'));
@@ -585,7 +541,6 @@ const CalculatorForm: React.FC<CalculatorFormProps> = ({ category, titleKey }) =
         report={aiReport}
         error={aiError}
         onClose={() => setAiModalVisible(false)}
-        onSaveWithReport={handleSaveWithAIReport}
         onOpenChat={() => {
           setAiModalVisible(false);
           setChatModalVisible(true);

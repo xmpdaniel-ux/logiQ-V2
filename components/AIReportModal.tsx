@@ -11,7 +11,7 @@ interface AIReportModalProps {
   report: string | null;
   error: string | null;
   onClose: () => void;
-  onSaveWithReport?: () => void;
+
   onOpenChat?: () => void;
   onReportError?: () => void;
   category?: string;
@@ -86,7 +86,7 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
   report,
   error,
   onClose,
-  onSaveWithReport,
+
   onOpenChat,
   onReportError,
   category
@@ -134,12 +134,7 @@ const AIReportModal: React.FC<AIReportModalProps> = ({
     }
   };
 
-  const handleSaveWithReport = () => {
-    if (onSaveWithReport) {
-      onSaveWithReport();
-      onClose();
-    }
-  };
+
 
   const handleOpenChat = () => {
     if (onOpenChat) {
