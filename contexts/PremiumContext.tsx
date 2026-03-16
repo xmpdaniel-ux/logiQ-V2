@@ -188,6 +188,8 @@ export const PremiumProvider: React.FC<{ children: ReactNode }> = ({ children })
     try {
       const VALID_SKUS = ['logiq_premium_monthly', 'logiq-monthly-v2', 'logiq-quarterly-v2', 'logiq-annual-v2'];
 
+      const purchases = await IAP.getAvailablePurchases();
+
       // We check for any of our known substrings or exact matches in the productIds
       const activePurchase = purchases.find(p => {
         const pId = p.productId || '';
